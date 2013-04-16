@@ -1,0 +1,9 @@
+program uno;
+{
+	a = 2;
+	
+	if ( a > 3 )
+	{
+		print ( "hola" );
+	};
+}

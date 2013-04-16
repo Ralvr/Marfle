@@ -1,0 +1,25 @@
+BITÁCORA
+
+Jueves 7 Marzo 2013
+(Rubén)
+-Se agregó la palabra reservada 'obj' al lenguaje para la declaración de 
+variables de tipo objeto.
+
+Jueves 14 de Marzo 2013
+(Rubén)
+-Se tienen los cuádruplos de las operaciones básicas, el estatuto "return" y el estatuto "if" sin la parte del ELSE
+
+Domingo 7 Abril de 2013
+(Rubén)
+-Se codificó el cubo semántico
+
+Domingo 14 Abril de 2013
+(Rubén)
+-Se cambió la estructura a usar para los módulos y objetos: Se reemplazaron las tuplas por objetos de tipo diccionario, para tener una mucho mejor indexación de elementos
+-Se implementó completamente el cubo semántico
+-Inicio de planeación de memorias
+
+Lunes 15 Abril de 2013
+(Rubén)
+-Se implementaron los módulos y variables de objeto. Ya se generan cuádruplos de métodos de objeto.
+    ·Se necesita ver la implementación de asignación de valores a variables de objeto antes de la           delcaración de módulos de objeto y hacer que se pueda hacer lo mismo desde el main del programa.

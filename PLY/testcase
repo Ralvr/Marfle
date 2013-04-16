@@ -1,0 +1,64 @@
+program uno {
+    object ob1
+    {
+        public int x;
+        private float ark;
+        public int x;
+        endvar;
+        x = 2;
+        ark = x * 3;
+        func void modobj()
+        {
+            int y;
+            int x;
+            endvar;
+            modobj ( 0 );
+            y = y + 1 * x;
+            print(y);
+        }
+    }
+    
+    int a;
+    int d[3][4];
+    float e;
+    derp bag;
+    int j;
+    endvar;
+    func int mod1 (int a; int b ) {
+        float y;
+        endvar;
+        return y;
+    }
+    func void mod2 ( ) {
+        float e2;
+        endvar;
+        mod1 ( 0 );
+    }
+    main ( ) {
+    	a = 1.2;
+    	a = 3 + 4 * 5 / 7 * 6 * (3 + 4);
+    	
+        mod2 ( 0 ) ;
+        
+        if ( a > 3 && e < 5 )
+    	{
+    		print ( "Hola" );
+    	}
+        else
+        {
+            a = 1;
+        }
+        
+        while ( a < 7 )
+        {
+            a = a + 1;
+        }
+        
+        do
+        {
+            a = a + 1;
+        } while ( a < 7 );
+        
+        a = a * 4;
+    }
+}

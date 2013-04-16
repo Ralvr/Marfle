@@ -1,0 +1,25 @@
+Códigos de Operación:
+
+0:  +
+1:  -
+2:  *
+3:  /
+4:  <
+5:  >
+6:  !=
+7:  <=
+8:  >=
+9:  ==
+10: =
+11: &&
+12: ||
+13: !
+14: PRINT
+15: RETURN
+16: GOTOF
+17: GOTOT
+18: GOTO
+19: ERA
+20: GOSUB
+21: PARAM
+22: RET
