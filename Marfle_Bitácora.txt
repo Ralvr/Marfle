@@ -22,4 +22,14 @@ Domingo 14 Abril de 2013
 Lunes 15 Abril de 2013
 (Rubén)
 -Se implementaron los módulos y variables de objeto. Ya se generan cuádruplos de métodos de objeto.
-    ·Se necesita ver la implementación de asignación de valores a variables de objeto antes de la           delcaración de módulos de objeto y hacer que se pueda hacer lo mismo desde el main del programa.
+    ·Se necesita ver la implementación de asignación de valores a variables de objeto antes de la delcaración de módulos de objeto y hacer que se pueda hacer lo mismo desde el main del programa.
+
+Martes 16 Abril de 2013
+(Rubén)
+-Se implementó el ciclo FOR en el lenguaje.
+-Se valida que la declaración de una variable de tipo objeto tenga en existencia el objeto.
+-Se introdujo la parametrización de métodos.
+
+Miércoles 17 Abril de 2013
+(Rubén)
+-Se implementó el ERA en los módulos y se crea el cuádruplo correspondiente, así como los cuádruplos de parámetros donde son necesarios.

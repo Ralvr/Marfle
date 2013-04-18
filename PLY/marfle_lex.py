@@ -1,3 +1,4 @@
+#coding=UTF-8
 #Marfle - Léxico
 #Compiladores - TC3040
 #
@@ -130,7 +131,7 @@ def t_CONINT(t):
     return t
 
 #Caracteres ignorados
-t_ignore = " \t"
+t_ignore = "\t "
 
 def t_newline(t):
     r'\n+'

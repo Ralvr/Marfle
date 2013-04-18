@@ -1,3 +1,4 @@
+#coding=UTF-8
 #Marfle - Sintaxis
 #Compiladores - TC3040
 #
@@ -62,6 +63,7 @@ dirProc = {}
 modRet = ''
 modActual = ''
 modParamType = ''
+modParams = 1
 ################################################################################
 
 
@@ -286,6 +288,7 @@ def p_return(p):
     'return :   RETURN superexpresion SEMCOL'
     global cont
     oper1 = pilaO.pop()
+    tipo = pTipos.pop()
     #cuadruplos.write("(16,\t,\t,\t%s)\n" % (oper1))
     cuad.append(Cuadruplo(cont, '15', -1, -1, oper1))
     cont += 1
@@ -316,17 +319,21 @@ def p_foundID(p):
             pilaO.append(p[-1])
         elif p[-1] in objetos[objActual].mods[modActual].vars:
             pTipos.append(objetos[objActual].mods[modActual].vars[p[-1]].type)
-            pilaO.append(p[-1])    
+            pilaO.append(p[-1])
+        elif p[-1] in objetos[objActual].mods[modActual].params:
+            print(objetos[objActual].mods[modActual].params)
+            pTipos.append(objetos[objActual].mods[modActual].params[p[-1]])
+            pilaO.append(p[-1]) 
         
     elif p[-1] in dirProc[modActual].vars:
         pTipos.append(dirProc[modActual].vars[p[-1]].type)
         pilaO.append(p[-1])
     elif p[-1] in dirProc:
         #Creación del ERA y demás cosas de llamada a módulos.
-        print("Yay!")
+        print("Entró módulo %s\nHay que agregar el ERA" % p[-1])
     else:
         #print(dirProc[modActual])
-        print(dirProc)
+        #print(dirProc)
         sys.exit("Variable NO declarada!! %s" % (p.lexer.lineno))
 
 def p_foundEQ(p):
@@ -456,7 +463,7 @@ def p_whileTermina(p):
 
 #FOR
 def p_for(p):
-    'for    :   FOR LPAREN IDENTI dimension IGUAL exp SEMCOL superexpresion SEMCOL IDENTI dimension IGUAL exp RPAREN bloque'
+    'for    :   FOR LPAREN asignacion meteContWhile superexpresion SEMCOL whileGeneraFalso asignacion RPAREN bloque whileTermina'
 
 #DIMENSION
 def p_dimension(p):
@@ -544,13 +551,15 @@ def p_modparams(p):
 def p_foundParam(p):
     'foundParam :'
     global modParamType, modActual, objActual
-    print(p[-1])
+    #print(p[-1])
     if objActual is not None and modActual is not None:
-        print(objetos)
         objetos[objActual].mods[modActual].params[p[-1]] = modParamType
+        #print(objetos)
     
-    if modActual is not None:
-        print(dirProc)
+    elif modActual is not None:
+        #print(dirProc)
+        dirProc[modActual].params[p[-1]] = modParamType
+        #print(dirProc)
 
 def p_masmodparams(p):
     '''masmodparams :   SEMCOL modparams
@@ -558,11 +567,6 @@ def p_masmodparams(p):
 
 def p_modbloque(p):
     'modbloque  :   LBRACK vars modbloq RBRACK'
-
-#def p_modvars(p):
-#    '''modvars  :   tipos IDENTI vartam SEMCOL modvars
-#                |'''
-
 
 def p_modbloq(p):
     '''modbloq  :   estatuto modbloq
@@ -594,13 +598,35 @@ def p_cteid(p):
     'cteid  :   IDENTI foundID funcdimobj'
     
 def p_funcdimobj(p):
-    '''funcdimobj   :   LPAREN exp mascall RPAREN SEMCOL
+    '''funcdimobj   :   LPAREN generaERA exp generaPARAM mascall RPAREN resetPARAM SEMCOL
                     |   dimension
                     |   PUNTO IDENTI dimobjcall'''
 
 def p_mascall(p):
-    '''mascall  :   COMMA exp mascall
+    '''mascall  :   COMMA exp generaPARAM mascall
                 |'''
+
+def p_generaERA(p):
+    'generaERA    :    '
+    global cont, modActual
+    cuad.append(Cuadruplo(cont, 19, -1, -1, p[-3]))
+    cont += 1
+    #print(objetos)
+
+def p_generaPARAM(p):
+    'generaPARAM    :   '
+    global cont, modParams
+    oper1 = pilaO.pop()
+    tipo = pTipos.pop()
+    cuad.append(Cuadruplo(cont, 21, oper1,  -1, "param%s" % modParams))
+    cont += 1
+    modParams += 1
+
+def p_resetPARAM(p):
+    'resetPARAM     :   '
+    global modParams
+    modParams = 1
+
 
 def p_dimobjcall(p):
     '''dimobjcall   :   dimension
@@ -647,7 +673,10 @@ def p_tipo(p):
 def p_isobject(p):
     'isobject   :   '
     global vartype
-    vartype = p[-1]
+    if p[-1] in objetos:
+        vartype = p[-1]
+    else:
+        sys.exit("Objeto \"%s\" NO declarado!! Está en la línea %s" % (p[-1], p.lexer.lineno))
 
 #TIPOS
 def p_tipos(p):
@@ -669,7 +698,14 @@ def p_tipos(p):
         vartype = 3
     
     if modActual is not None:
-        modParamType = p[-1]
+        if(p[1] == 'int'):
+            modParamType = 0
+        elif(p[1] == 'float'):
+            modParamType = 1
+        elif(p[-1] == 'bool'):
+            modParamType = 2
+        elif(p[-1] == 'string'):
+            modParamType = 3
     
 #EXPRESION
 def p_expresion(p):
@@ -780,4 +816,4 @@ for objeto in objetos:
     print("%s\n%s" % (objetos[objeto].vars,objetos[objeto].mods))
 '''
 
-#print(objetos)
+#print(dirProc)

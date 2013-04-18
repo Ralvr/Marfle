@@ -1,5 +1,5 @@
 program uno {
-    object ob1
+    object derp
     {
         public int x;
         private float ark;
@@ -7,12 +7,12 @@ program uno {
         endvar;
         x = 2;
         ark = x * 3;
-        func void modobj()
+        func void modobj(int z; int w)
         {
             int y;
             int x;
             endvar;
-            modobj ( 0 );
+            modobj ( z + 1 , w * 2 );
             y = y + 1 * x;
             print(y);
         }
@@ -32,12 +32,12 @@ program uno {
     func void mod2 ( ) {
         float e2;
         endvar;
-        mod1 ( 0 );
+        mod1 ( e2 + 3 );
     }
     main ( ) {
-    	a = 1.2;
+    	a = 1;
     	a = 3 + 4 * 5 / 7 * 6 * (3 + 4);
-    	
+    	e = 1.2;
         mod2 ( 0 ) ;
         
         if ( a > 3 && e < 5 )
@@ -58,7 +58,15 @@ program uno {
         {
             a = a + 1;
         } while ( a < 7 );
-        
+
+        for(a = 0; a < 5; a = a +1;)
+        {
+            e = e + 4.5 * a;
+            for(a = 1; a < 6; a = a + 2;){
+                print(a);
+            }
+        }
+
         a = a * 4;
     }
 }
