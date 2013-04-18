@@ -21,7 +21,11 @@ from cuboSem import cuboSem
 ## ARCHIVO DONDE SE ESCRIBIRÁN LOS CUÁDRUPLOS
 cuadruplos = open('cuadruplos', 'w')
 
+#Variable de donde se obtendrá el contador de variables temporales
 temporal = 1
+
+#Variable para el número de parámetros dentro de un módulo
+ParamCount = 0
 
 #Verifica la versión de Python para la entrada de datos
 if sys.version_info[0] < 3:
@@ -39,13 +43,7 @@ pTipos  =   []
 '''
     Creación de la estructura de Tabla de Variables
 '''
-#var = collections.namedtuple('Var', 'name type dim')
 var = collections.namedtuple('Var', 'type dim')
-#test = {'a': var2('int', [])}
-#test['b'] = var2('float', [3,4])
-
-#print(test)
-#print(test['b'])
 
 varname = ''
 vartype = ''
@@ -58,12 +56,11 @@ vardim2 = ''
     Creación de la estructura de Directorio de Procedimientos
 '''
 DirProc = collections.namedtuple('DirProc', 'tipoRet params vars')
-#DirProc2 = collections.namedtuple('DirProc2', 'tipoRet vars')
 dirProc = {}
 modRet = ''
 modActual = ''
 modParamType = ''
-modParams = 1
+modParams = 0
 ################################################################################
 
 
@@ -321,7 +318,7 @@ def p_foundID(p):
             pTipos.append(objetos[objActual].mods[modActual].vars[p[-1]].type)
             pilaO.append(p[-1])
         elif p[-1] in objetos[objActual].mods[modActual].params:
-            print(objetos[objActual].mods[modActual].params)
+            #print(objetos[objActual].mods[modActual].params)
             pTipos.append(objetos[objActual].mods[modActual].params[p[-1]])
             pilaO.append(p[-1]) 
         
@@ -330,7 +327,8 @@ def p_foundID(p):
         pilaO.append(p[-1])
     elif p[-1] in dirProc:
         #Creación del ERA y demás cosas de llamada a módulos.
-        print("Entró módulo %s\nHay que agregar el ERA" % p[-1])
+        #print("Entró módulo %s\nHay que agregar el ERA" % p[-1])
+        pass
     else:
         #print(dirProc[modActual])
         #print(dirProc)
@@ -598,9 +596,14 @@ def p_cteid(p):
     'cteid  :   IDENTI foundID funcdimobj'
     
 def p_funcdimobj(p):
-    '''funcdimobj   :   LPAREN generaERA exp generaPARAM mascall RPAREN resetPARAM SEMCOL
+    '''funcdimobj   :   LPAREN generaERA llamaParams llamaParams RPAREN resetPARAM SEMCOL
                     |   dimension
                     |   PUNTO IDENTI dimobjcall'''
+
+def p_llamaParams(p):
+    '''llamaParams      :   exp generaPARAM mascall
+                        |   '''
+
 
 def p_mascall(p):
     '''mascall  :   COMMA exp generaPARAM mascall
@@ -615,17 +618,28 @@ def p_generaERA(p):
 
 def p_generaPARAM(p):
     'generaPARAM    :   '
-    global cont, modParams
+    global cont, modParams, ParamCount, objActual, modActual
+    #print(modActual)
+    ParamCount += 1
+    if objActual is not None:
+        if ParamCount > len(objetos[objActual].mods[modActual].params):
+            sys.exit("Número de parámetros en llamada a %s es mayor que en la definición." % modActual)
+    elif ParamCount > len(dirProc[modActual].params):
+        sys.exit("Número de parámetros en llamada a %s es mayor que en la definición." % modActual)
+    
     oper1 = pilaO.pop()
     tipo = pTipos.pop()
     cuad.append(Cuadruplo(cont, 21, oper1,  -1, "param%s" % modParams))
     cont += 1
     modParams += 1
+    
 
 def p_resetPARAM(p):
     'resetPARAM     :   '
-    global modParams
+    global modParams, ParamCount
+    #print(dirProc)
     modParams = 1
+    ParamCount = 0
 
 
 def p_dimobjcall(p):
@@ -785,35 +799,43 @@ def p_error(p):
     sys.exit("Error de Sintaxis en '%s', renglón '%s'" % (p.value, p.lexer.lineno))
 
 
-#ENTRADA DE DATOS AL PARSER
-#Se toma la entrada del archivo "testcase"
-yacc.yacc()
-s = open('testcase', 'r').read()
-yacc.parse(s)
-#print("\n%s\n" % dirProc)
+def main(arg):
+    #print(arg)
+    if arg == 'c':
+        #ENTRADA DE DATOS AL PARSER
+        #Se toma la entrada del archivo "testcase"
+        yacc.yacc()
+        s = open('testcase', 'r').read()
+        yacc.parse(s)
+        #print("\n%s\n" % dirProc)
 
-#print(pOper)
-#print(pilaO)
+        #print(pOper)
+        #print(pilaO)
 
-for cu in cuad:
-    print("%s\t| %s,\t%s,\t%s,\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
-    cuadruplos.write("%s,\t%s,\t%s,\t%s,\t%s\n" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
+        for cu in cuad:
+            print("%s\t| %s,\t%s,\t%s,\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
+            cuadruplos.write("%s,\t%s,\t%s,\t%s,\t%s\n" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
 
-cuadruplos.close()
+        cuadruplos.close()
 
-'''
-for dirs in dirProc.keys():
-    print("Módulo\n***************\nNombre\tTipo")
-    print("%s\t%s" % (dirs, dirProc[dirs].tipoRet))
-    print("\nVariables de módulo")
-    print("Nombre\tTipo\tDimensión")
-    for varis in dirProc[dirs].vars.keys():
-        print("%s\t%s\t%s" % (varis, dirProc[dirs].vars[varis].type, dirProc[dirs].vars[varis].dim))
-    print("***************\n")
-    
-print("****OBJETOS****")
-for objeto in objetos:
-    print("%s\n%s" % (objetos[objeto].vars,objetos[objeto].mods))
-'''
+        '''
+        for dirs in dirProc.keys():
+            print("Módulo\n***************\nNombre\tTipo")
+            print("%s\t%s" % (dirs, dirProc[dirs].tipoRet))
+            print("\nVariables de módulo")
+            print("Nombre\tTipo\tDimensión")
+            for varis in dirProc[dirs].vars.keys():
+                print("%s\t%s\t%s" % (varis, dirProc[dirs].vars[varis].type, dirProc[dirs].vars[varis].dim))
+            print("***************\n")
+            
+        print("****OBJETOS****")
+        for objeto in objetos:
+            print("%s\n%s" % (objetos[objeto].vars,objetos[objeto].mods))
+        '''
 
-#print(dirProc)
+        #print(dirProc)
+    else:
+        sys.exit("El parámetro no fue aceptado. El uso es:\n\npython Marfle.py c\n")
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1]))
