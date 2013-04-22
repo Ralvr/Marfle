@@ -104,7 +104,7 @@ t_COMMA     =   r'\,'
 #t_DOSPUN    =   r'\:'
 t_SEMCOL    =   r'\;'
 #t_COMILL    =   r'\"'
-t_CONSTR    =   r'\"[A-Za-z0-9]+\"'
+t_CONSTR    =   r'\"[A-Za-z0-9 ]+\"'
 
 def t_IDENTI(t):
     r'[a-z][a-zA-Z0-9_]*'

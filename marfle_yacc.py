@@ -21,7 +21,11 @@ from cuboSem import cuboSem
 ## ARCHIVO DONDE SE ESCRIBIRÁN LOS CUÁDRUPLOS
 cuadruplos = open('cuadruplos', 'w')
 
+#Variable de donde se obtendrá el contador de variables temporales
 temporal = 1
+
+#Variable para el número de parámetros dentro de un módulo
+ParamCount = 0
 
 #Verifica la versión de Python para la entrada de datos
 if sys.version_info[0] < 3:
@@ -34,74 +38,12 @@ pOper   =   []
 pSaltos =   []
 pTipos  =   []
 
-mem = collections.namedtuple('Memoria', 'int float bool str')
-#MemGlobal       =   mem({},{},{},{})
-MemConstante    =   mem({},{},{},{})
-MemTemporal     =   mem({},{},{},{})
-MemGlobal       =   mem({},{},{},{})
-
-######  MEMORIA GLOBAL
-##############                  INT
-MemGlobalINTCont = 2500
-MemGlobalINTOffset = 0
-
-##############                  FLOAT
-MemGlobalFLOCont = 5000
-MemGlobalFLOOffset = 0
-
-##############                  BOOL
-MemGlobalBOLCont = 7500
-MemGlobalBOLOffset = 0
-
-##############                  STRING
-MemGlobalSTRCont = 10000
-MemGlobalSTROffset = 0
-
-######  MEMORIA TEMPORAL
-##############                  INT
-MemTempINTCont = 22500
-MemTempINTOffset = 0
-
-##############                  FLOAT
-MemTempFLOCont = 25000
-MemTempFLOOffset = 0
-
-##############                  BOOL
-MemTempBOLCont = 27500
-MemTempBOLOffset = 0
-
-##############                  STRING
-MemTempSTRCont  = 30000
-MemTempSTROffset    = 0
-
-
-######MEMORIA CONSTANTE
-##############                  INT
-#Contador de Memoria constante
-MemConstanteINTCont = 32500
-MemConstanteINTOffset = 0
-
-##############                  FLOAT
-#Contador de Memoria flotante
-MemConstanteFLOCont = 35000
-MemConstanteFLOOffset = 0
-
-##############                  BOOL
-#Contador de Memoria Booleana
-MemConstanteBOLCont = 37500
-MemConstanteBOLOffset = 0
-
-##############                  STRING
-MemConstanteSTRCont = 40000
-MemConstanteSTROffset = 0
-
-
 
 ################################################################################
 '''
     Creación de la estructura de Tabla de Variables
 '''
-var = collections.namedtuple('Var', 'type dim dirV')
+var = collections.namedtuple('Var', 'type dim obj')
 
 varname = ''
 vartype = ''
@@ -109,23 +51,16 @@ vardim1 = ''
 vardim2 = ''
 ################################################################################
 
-Dim = collections.namedtuple('Dim', 'lsup linf mn')
-dim = {}
-#dim['dim1'] = Dim(3,0,0)
-#print(dim)
-
-
 ################################################################################
 '''
     Creación de la estructura de Directorio de Procedimientos
 '''
-DirProc = collections.namedtuple('DirProc', 'tipoRet params vars inicio')
+DirProc = collections.namedtuple('DirProc', 'tipoRet params vars')
 dirProc = {}
 modRet = ''
 modActual = ''
-modSiguiente = ''
 modParamType = ''
-modParams = 1
+modParams = 0
 ################################################################################
 
 
@@ -187,16 +122,16 @@ def p_progmod(p):
 #####SEMÁNTICA DE PROGRAM
 def p_semCreaDP(p):
     'semCreaDP  :'
-    global dirProc, modActual, cont
+    global dirProc, modActual
     #dirProc.append(DirProc(p[-1], 'global', []))
-    dirProc['main'] = DirProc('global', {}, {}, cont)
+    dirProc['main'] = DirProc('global', {}, {})
     modActual = 'main'
     #print(dir2)
 
 def p_cuadInicial(p):
     'cuadInicial    :'
     global cont
-    cuad.append(Cuadruplo(cont, 18, -1, -1, -1))
+    cuad.append(Cuadruplo(cont, 19, -1, -1, -1))
     cont += 1
 
 #MAIN
@@ -206,7 +141,7 @@ def p_main(p):
 def p_iniciaMain(p):
     'iniciaMain :'
     global modActual
-    cuad[0] = Cuadruplo(0, 18, -1, -1, cont)
+    cuad[0] = Cuadruplo(0, 19, -1, -1, cont)
     modActual = 'main'
 
 #OBJETO
@@ -216,15 +151,6 @@ def p_objeto(p):
 def p_herencia(p):
     '''herencia : LPAREN IDENTI RPAREN
                 |'''
-    if len(p) > 1:
-        if p[2] in objetos:
-            objetos[p[-2]] = Objeto(p[2],{}, objetos[p[2]].mods)
-            for key, variable in objetos[p[2]].vars.iteritems():
-                if objetos[p[2]].vars[key].vis == 'public':
-                    objetos[p[-2]].vars[key] = objetos[p[2]].vars[key]
-        else:
-            sys.exit("Objeto %s no está delcarado." % p[2])
-
 
 def p_objmet(p):
     '''objmet   : modulo objmet
@@ -248,7 +174,6 @@ def p_acabaOBJ(p):
     'acabaOBJ   :'
     global modActual, objActual
     modActual = 'main'
-    #print(objetos[objActual])
     objActual = None
 
 #BLOQUE
@@ -275,7 +200,11 @@ def p_estatuto(p):
 
 #VARS
 def p_vars(p):
-    '''vars     :   tipo IDENTI vartam SEMCOL insertVar varsagain'''
+    '''vars     :   tipo noVar IDENTI vartam SEMCOL insertVar varsagain'''
+
+def p_noVar(p):
+    'noVar  :   '
+    print(p[-1])
     
 
 def p_vartam(p):
@@ -287,11 +216,18 @@ def p_varsagain(p):
                     |   ENDVAR SEMCOL'''
 
 def p_objvars(p):
-    'objvars    :   visibilidad tipo IDENTI vartam insertObjVar SEMCOL delVis objvarsagain'
+    'objvars    :   visibilidad tipo IDENTI vartam  insertObjVar SEMCOL delVis objvarsagain'
+
 
 def p_visibilidad(p):
     '''visibilidad  :   PUBLIC foundKeyword
                     |   PRIVATE foundKeyword'''
+
+def p_varDeclarada(p):
+    'varDeclarada   :   '
+    global objActual, modActual
+    if p[-1] in objetos[objActual].vars:
+        sys.exit("Variable ya declarada.")
 
 def p_foundKeyword(p):
     'foundKeyword   :'
@@ -301,7 +237,10 @@ def p_foundKeyword(p):
 def p_insertObjVar(p):
     'insertObjVar   :'
     global visibilidad, vartype, vardim1, objActual
-    objetos[objActual].vars[p[-2]] = VarObj(visibilidad, vartype, dim)
+    objetos[objActual].vars[p[-2]] = VarObj(visibilidad, vartype, vardim1)
+    #print(vardim1)
+    #print(objetos[objActual].vars)
+    vardim1 = []
     #print(objetos)
 
 def p_delVis(p):
@@ -319,35 +258,20 @@ def p_insertVar(p):
     global vartype, vardim1, modActual, objActual
     
     if objActual is not None:
-        #print(modActual)
-        #print(objActual)
         if p[-3] not in objetos[objActual].mods[modActual].vars:
-            objetos[objActual].mods[modActual].vars[p[-3]] = var(vartype, dim, 0)
+            objetos[objActual].mods[modActual].vars[p[-3]] = var(vartype, vardim1, {})
         else:
             sys.exit("Variable ya declarada\n")
     else:
+    
         if p[-3] not in dirProc[modActual].vars:
-            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset
-            if modActual == 'main':
-                if vartype == 0:
-                    dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalINTCont + MemGlobalINTOffset)
-                    MemGlobalINTOffset += 1
-                elif vartype == 1:
-                    dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalFLOCont + MemGlobalFLOOffset)
-                    MemGlobalFLOOffset += 1
-                elif vartype == 2:
-                    dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalBOLCont + MemGlobalBOLOffset)
-                    MemGlobalBOLOffset += 1
-                elif vartype == 3:
-                    dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalSTRCont + MemGlobalSTROffset)
-                    MemGlobalSTROffset += 1
-
+            if vartype in objetos:
+                dirProc[modActual].vars[p[-3]] = var(vartype, vardim1, objetos[vartype])
             else:
-                dirProc[modActual].vars[p[-3]] = var(vartype, dim, 0)
+                dirProc[modActual].vars[p[-3]] = var(vartype, vardim1, {})
         else:
             sys.exit("Variable ya declarada\n")
-    #print(dirProc[modActual])
-    vardim1 = {}
+    vardim1 = []
                     
 #TAMAÑO
 def p_tamano(p):
@@ -359,20 +283,15 @@ def p_tamano(p):
 def p_metearr(p):
     'metearr    :'
     global vardim1
-    vardim1 = p[-1]
-    dim['dim1'] = Dim(p[-1], 0, 0)
-
+    vardim1 = [p[-1]]
 
 #TAMMATRIZ
 def p_tammatriz(p):
     '''tammatriz    :   LCORCH CONINT RCORCH
                     |'''
-    global vardim2
+    global vardim1
     if len(p) > 1:
-        dim['dim1'] = Dim(vardim1, 0, p[2])
-        #vardim1.append(p[2])
-        dim['dim2'] = Dim(p[2], 0, 0)
-        #print(dim)
+        vardim1.append(p[2])
         #print(vardim2)
 
 #RETURN
@@ -394,21 +313,18 @@ def p_asignacion(p):
     operIgualado = pilaO.pop()
     tipo2 = pTipos.pop()
     tipoRes = cuboSem[tipo2][tipo1][operador]
-    print(tipo2, tipo1, operador)
     if tipoRes is not -1:
         global cont
         cuad.append(Cuadruplo(cont, operador, oper1, -1, operIgualado))
         cont += 1
-    else:
-        sys.exit("Tipos Inválidos en %s" % p.lexer.lineno)
     #print(pilaO)
     
 def p_foundID(p):
     'foundID    :'
-    global modActual, objActual, cont
+    global modActual, objActual
     #El primer IF es el que revisa la parte de las variables de objeto
     if objActual is not None:
-        #Variables de objeto
+        print("El modacutal es %s" % modActual)
         if p[-1] in objetos[objActual].vars:
             pTipos.append(objetos[objActual].vars[p[-1]].type)
             pilaO.append(p[-1])
@@ -416,18 +332,20 @@ def p_foundID(p):
             pTipos.append(objetos[objActual].mods[modActual].vars[p[-1]].type)
             pilaO.append(p[-1])
         elif p[-1] in objetos[objActual].mods[modActual].params:
+            #print(objetos[objActual].mods[modActual].params)
             pTipos.append(objetos[objActual].mods[modActual].params[p[-1]])
             pilaO.append(p[-1]) 
         
     elif p[-1] in dirProc[modActual].vars:
         pTipos.append(dirProc[modActual].vars[p[-1]].type)
-        pilaO.append(dirProc[modActual].vars[p[-1]].dirV)
-    elif p[-1] in dirProc[modActual].params:
-        pTipos.append(dirProc[modActual].params[p[-1]])
         pilaO.append(p[-1])
     elif p[-1] in dirProc:
+        #Creación del ERA y demás cosas de llamada a módulos.
+        #print("Entró módulo %s\nHay que agregar el ERA" % p[-1])
         pass
     else:
+        #print(dirProc[modActual])
+        #print(dirProc)
         sys.exit("Variable NO declarada!! %s" % (p.lexer.lineno))
 
 def p_foundEQ(p):
@@ -439,10 +357,9 @@ def p_escritura(p):
     'escritura  :   PRINT LPAREN prntparam RPAREN SEMCOL'
     
     oper1 = pilaO.pop()
-    #print(oper1)
     tipo1 = pTipos.pop()
     global cont
-    cuad.append(Cuadruplo(cont, 14, -1, -1, oper1))
+    cuad.append(Cuadruplo(cont, '14', -1, -1, oper1))
     cont += 1
 
 def p_prntparam(p):
@@ -594,48 +511,14 @@ def p_genCuadMUDI(p):
     
     tipo2 = pTipos.pop()
     tipo1 = pTipos.pop()
+    #print(pTipos)
     global temporal, cont
     tipoRes = cuboSem[tipo1][tipo2][operador]
     if(tipoRes != -1):
-        global MemTempINTCont, MemTempINTOffset, MemTempFLOCont, MemTempFLOOffset, MemTempBOLCont, MemTempBOLOffset, MemTempSTRCont, MemTempSTROffset, modActual
         pTipos.append(tipoRes)
-        if modActual == 'main':
-            if tipoRes == 0:
-                if MemTempINTOffset < 2500:
-                    MemTemporal.int[MemTempINTCont      +   MemTempINTOffset] = "t_%s" % temporal
-                    pilaO.append(MemTempINTCont      +   MemTempINTOffset)
-                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempINTCont + MemTempINTOffset))
-                    MemTempINTOffset += 1
-                else:
-                    sys.exit("Demasiadas temporales enteras.")
-            elif tipoRes == 1:
-                if MemTempFLOOffset < 2500:
-                    MemTemporal.float[MemTempFLOCont    +   MemTempFLOOffset] = "t_%s" % temporal
-                    pilaO.append(MemTempFLOCont    +   MemTempFLOOffset)
-                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempFLOCont + MemTempFLOOffset))
-                    MemTempFLOOffset += 1
-                else:
-                    sys.exit("Demasiadas Temporales flotantes")
-            elif tipoRes == 2:
-                if MemTempBOLOffset < 2500:
-                    MemTemporal.bool[MemTempBOLCont     +   MemTempBOLOffset] = "t_%s" % temporal
-                    pilaO.append(MemTempBOLCont     +   MemTempBOLOffset)
-                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempBOLCont + MemTempBOLOffset))
-                    MemTempBOLOffset += 1
-                else:
-                    sys.exit("Demasiadas Temporales booleanas")
-            elif tipoRes == 3:
-                if MemTempSTROffset < 2500:
-                    MemTemporal.str[MemTempSTRCont      +   MemTempSTROffset] = "t_%s" % temporal
-                    pilaO.append(MemTempSTRCont      +   MemTempSTROffset)
-                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempSTRCont + MemTempSTROffset))
-                    MemTempSTROffset += 1
-                else:
-                    sys.exit("Demasiadas temporales string")
-        else:
-            pilaO.append("t_%s" % temporal)
-            #cuadruplos.write("(%s,\t%s,\t%s,\tt_%s)\n" % (operador,oper1,oper2,temporal))
-            cuad.append(Cuadruplo(cont, operador, oper1, oper2, "t_%s" % temporal))
+        pilaO.append("t_%s" % temporal)
+        #cuadruplos.write("(%s,\t%s,\t%s,\tt_%s)\n" % (operador,oper1,oper2,temporal))
+        cuad.append(Cuadruplo(cont, operador, oper1, oper2, "t_%s" % temporal))
     cont += 1
     temporal += 1
 
@@ -695,46 +578,31 @@ def p_masmodparams(p):
                     |'''
 
 def p_modbloque(p):
-    'modbloque  :   LBRACK noVars RBRACK retornoMOD'
+    'modbloque  :   LBRACK hayvars modbloq RBRACK'
 
-def p_noVars(p):
-    '''noVars   :   meteInicio vars modbloq
-                |   meteInicio modbloq'''
-
-def p_retornoMOD(p):
-    'retornoMOD     :   '
-    global cont
-    cuad.append(Cuadruplo(cont, 22, -1, -1, -1))
-    cont += 1
-
-def p_meteInicio(p):
-    'meteInicio     :   '
-    global modActual, objActual, cont
-    if objActual is not None:
-        #print(objetos[objActual].mods[modActual])
-        objetos[objActual].mods[modActual].inicio['inicio'] = cont
-    else:
-        dirProc[modActual].inicio['inicio'] = cont
+def p_hayvars(p):
+    '''hayvars      :   vars
+                    |   '''
 
 def p_modbloq(p):
     '''modbloq  :   estatuto modbloq
                 |   return modbloq
                 |   varcte modbloq
-                |'''
+                |   '''
 
 #####SEMÁNTICA DE MODULO
 def p_semCreaMod(p):
     'semCreaMod :'
     #dirProc.append(DirProc(p[-1], modRet, []))
-    global modActual, objActual, cont
+    global modActual, objActual
     if objActual is not None:
-        objetos[objActual].mods[p[-1]] = DirProc(modRet, {}, {}, {})
+        objetos[objActual].mods[p[-1]] = DirProc(modRet, {}, {})
         modActual = p[-1]
         #print(objetos)
     else:
         modActual = p[-1]
     #print(modActual)
-        dirProc[p[-1]] = DirProc(modRet, {}, {}, {})
+        dirProc[p[-1]] = DirProc(modRet, {}, {})
     #print(dirProc)
 
 #VARCTE
@@ -746,13 +614,14 @@ def p_cteid(p):
     'cteid  :   IDENTI foundID funcdimobj'
     
 def p_funcdimobj(p):
-    '''funcdimobj   :   LPAREN generaERA llamaParam RPAREN resetPARAM SEMCOL
+    '''funcdimobj   :   LPAREN generaERA llamaParams RPAREN resetPARAM SEMCOL
                     |   dimension
                     |   PUNTO IDENTI dimobjcall'''
 
-def p_llamaParam(p):
-    '''llamaParam   :   exp generaPARAM mascall
-                    |'''
+def p_llamaParams(p):
+    '''llamaParams      :   exp generaPARAM mascall
+                        |   '''
+
 
 def p_mascall(p):
     '''mascall  :   COMMA exp generaPARAM mascall
@@ -760,28 +629,35 @@ def p_mascall(p):
 
 def p_generaERA(p):
     'generaERA    :    '
-    global cont, modActual, modSiguiente
+    global cont, modActual
     cuad.append(Cuadruplo(cont, 19, -1, -1, p[-3]))
-    modSiguiente = p[-3]
     cont += 1
     #print(objetos)
 
 def p_generaPARAM(p):
     'generaPARAM    :   '
-    global cont, modParams
+    global cont, modParams, ParamCount, objActual, modActual
+    #print(modActual)
+    
+    if objActual is not None:
+        if ParamCount > len(objetos[objActual].mods[modActual].params):
+            sys.exit("Número de parámetros en llamada a %s es mayor que en la definición." % modActual)
+    elif ParamCount > len(dirProc[modActual].params):
+        sys.exit("Número de parámetros en llamada a %s es mayor que en la definición." % modActual)
+    ParamCount += 1 #Se aumenta el contador de parámetros en la llamada al módulo.
     oper1 = pilaO.pop()
     tipo = pTipos.pop()
     cuad.append(Cuadruplo(cont, 21, oper1,  -1, "param%s" % modParams))
     cont += 1
     modParams += 1
+    
 
 def p_resetPARAM(p):
     'resetPARAM     :   '
-    global modParams, modActual, cont, modSiguiente
+    global modParams, ParamCount
+    #print(dirProc)
     modParams = 1
-    cuad.append(Cuadruplo(cont, 20, -1, -1, dirProc[modSiguiente].inicio['inicio']))
-    cont += 1
-
+    ParamCount = 0
 
 
 def p_dimobjcall(p):
@@ -797,54 +673,20 @@ def p_otrasconst(p):
 
 def p_foundNUMINT(p):
     'foundNUMINT   :'
-    global MemConstINT, MemConstanteINTOffset, MemConstanteINTCont
     pTipos.append(0)
-    if p[-1] in MemConstante.int:
-        pilaO.append(MemConstante.int[p[-1]])
-    elif MemConstanteINTOffset  < 2500:
-        MemConstante.int[p[-1]] = MemConstanteINTCont + MemConstanteINTOffset
-        pilaO.append(MemConstante.int[p[-1]])
-        MemConstanteINTOffset += 1
-    else:
-        sys.exit("Demasiadas constantes enteras!!")
-
-    '''if p[-1] in MemConstINT:
-        pilaO.append(MemConstINT[p[-1]])    
-    else:
-        MemConstINT[p[-1]] = MemConstanteINTCont + MemConstanteINTOffset
-        pilaO.append(MemConstanteINTCont + MemConstanteINTOffset)
-        MemConstanteINTOffset += 1
-    #print(pTipos) '''
+    pilaO.append(p[-1])
+    #print(pTipos)
 
 def p_foundNUMFLO(p):
     'foundNUMFLO    :'
-    global MemConstanteFLOOffset, MemConstanteFLOCont
     pTipos.append(1)
-    if p[-1] in MemConstante.float:
-        pilaO.append(MemConstante.float[p[-1]])
-    elif MemConstanteFLOOffset < 2500:
-        MemConstante.float[p[-1]] = MemConstanteFLOCont + MemConstanteFLOOffset
-        pilaO.append(MemConstante.float[p[-1]])
-        MemConstanteFLOOffset += 1
-    else:
-        sys.exit("Demasiadas constantes flotantes")
-
-
-    #pilaO.append(p[-1])
+    pilaO.append(p[-1])
     #print(pTipos)
 
 def p_foundSTR(p):
     'foundSTR   :'
-    global MemConstanteSTRCont, MemConstanteSTROffset
     pTipos.append(3)
-    if p[-1] in MemConstante.str:
-        pilaO.append(MemConstante.str[p[-1]])
-    elif MemConstanteSTROffset < 2500:
-        MemConstante.str[p[-1]] = MemConstanteSTRCont + MemConstanteSTROffset
-        pilaO.append(MemConstante.str[p[-1]])
-        MemConstanteSTROffset += 1
-    else:
-        sys.exit("Demasiadas constantes STRING")
+    pilaO.append(p[-1])
 
 def p_conbol(p):
     '''conbol   :   TRUE foundBOOL
@@ -852,16 +694,8 @@ def p_conbol(p):
 
 def p_foundBOOL(p):
     'foundBOOL  :'
-    global MemConstanteBOLOffset, MemConstanteBOLCont
     pTipos.append(2)
-    if p[-1] in MemConstante.bool:
-        pilaO.append(MemConstante.bool[p[-1]])
-    elif MemConstanteBOLOffset < 2500:
-        MemConstante.bool[p[-1]] = MemConstanteBOLCont + MemConstanteBOLOffset
-        pilaO.append(MemConstante.bool[p[-1]])
-        MemConstanteBOLOffset += 1
-    else:
-        sys.exit("Demasiadas constantes booleanas")
+    pilaO.append(p[-1])
 
 #TIPO
 def p_tipo(p):
@@ -985,7 +819,7 @@ def p_error(p):
 
 def main(arg):
     #print(arg)
-    if arg == 'c' or arg == 'r':
+    if arg == 'c':
         #ENTRADA DE DATOS AL PARSER
         #Se toma la entrada del archivo "testcase"
         yacc.yacc()
@@ -997,7 +831,7 @@ def main(arg):
         #print(pilaO)
 
         for cu in cuad:
-            print("%s\t| %s,\t\t\t\t%s,\t\t\t\t%s,\t\t\t\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
+            #print("%s\t| %s,\t%s,\t%s,\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
             cuadruplos.write("%s,\t%s,\t%s,\t%s,\t%s\n" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
 
         cuadruplos.close()
@@ -1017,16 +851,9 @@ def main(arg):
             print("%s\n%s" % (objetos[objeto].vars,objetos[objeto].mods))
         '''
 
-        print("\n\n")
-        if arg == 'r':
-            from VM import MaquinaVirtual
-            
-            MaquinaVirtual(cuad[0].pos, cuad[0].op, cuad[0].oper1, cuad[0].oper2, cuad[0].res)
-
-        #for key, objetito in objetos.iteritems():
-        #    print(objetos[key].vars)
-        #    print("\n\n")
-        #print(MemConstante)
+        print(dirProc)
+    else:
+        sys.exit("El parámetro no fue aceptado. El uso es:\n\npython Marfle.py c\n")
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1]))

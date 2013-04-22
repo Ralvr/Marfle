@@ -33,3 +33,12 @@ Martes 16 Abril de 2013
 Miércoles 17 Abril de 2013
 (Rubén)
 -Se implementó el ERA en los módulos y se crea el cuádruplo correspondiente, así como los cuádruplos de parámetros donde son necesarios.
+
+Viernes 19 Abril de 2013
+(Rubén)
+-Se implementó la delaración de arreglos.
+-Se implementó el retorno de módulo, así como el cuádruplo de GOSUB.
+
+Domingo 21 de Abril de 2013
+(Rubén)
+-Se inició la máquina virtual. Hace sumas de constantes enteras y temporales enteras, pero tiene problemas al asignarlas a variables globales.

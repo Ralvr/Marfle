@@ -2,75 +2,38 @@ program uno {
     object derp
     {
         public int x;
-        private float ark;
-        public int x;
+        private int ark;
         endvar;
-        x = 2;
-        ark = x * 3;
-        func void modobj(int z; int w)
-        {
-            int y;
-            int x;
-            endvar;
-            modobj ( z + 1 , w * 2 );
-            y = y + 1 * x;
-            print(y);
-        }
     }
     
     int a;
-    int d[3][4];
-    float e;
-    derp bag;
-    int j;
+    int b;
+    int d;
+    string str;
+    bool boolean;
     endvar;
-    func int mod1 (int a; int b ) {
-        float y;
-        endvar;
-        return y;
+
+    func int fibonacci (int n) 
+    {
+        
     }
-    func void mod2 () {
-        float e2;
-        endvar;
-        mod1 ( e2 + 3 );
-    }
+    
     main ( ) {
-    	a = 1;
-    	a = 3 + 4 * 5 / 7 * 6 * (3 + 4);
-    	e = 1.2;
-        mod2 ( 3 ) ;
-        
-        if ( a > 3 && e < 5 )
-    	{
-    		print ( "Hola" );
-    	}
-        else
-        {
-            a = 1;
-        }
-        
-        while ( a < 7 )
-        {
-            while ( a > 2 )
-            {
-                e = e * 2;
-            }
-            a = a + 1;
-        }
-        
-        do
-        {
-            a = a + 1;
-        } while ( a < 7 );
-
-        for(a = 0; a < 5; a = a +1;)
-        {
-            e = e + 4.5 * a;
-            for(a = 1; a < 6; a = a + 2;){
-                print(a);
-            }
-        }
-
-        a = a * 4;
+        d = 3;
+        print("El valor de la variable es");
+        print(d);
+        a = 1 + 2 + 3 + 4 + 5 + 6 + 7;
+        print("El valor de la variable es");
+        print(a);
+        a = 5 - 2 - 1;
+        print("El valor de la variable es");
+        print(a);
+        str = "hola";
+        print("El valor de la variable es");
+        print(str);
+        boolean = true;
+        a = 2 + 4;
+        print(23);
+        print(a);
     }
 }
