@@ -1,9 +1,16 @@
 #coding=UTF-8
-from marfle_yacc import cuad, MemConstante, MemTemporal, MemGlobal, dirProc, objetos
+from marfle_yacc import cuad, MemConstante, MemTemporal, MemGlobal, MemLocal, dirProc, objetos
 #print(MemTemporal)
+
+MemLocalINTCont = 22500
+MemLocalINTLimite = 25000
+MemLocalINTOffset = 0
+
 invMemConstINT 	= 	{MemConstante.int[k] : k for k in MemConstante.int}
 invMemConstSTR	=	{MemConstante.str[k] : k for k in MemConstante.str}
-print(invMemConstSTR)
+stackLocal = []
+stackEstado = []
+#print(invMemConstSTR)
 vmModActual = 'main'
 
 def MaquinaVirtual(pos, op, oper1, oper2, res):
@@ -107,6 +114,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 	elif op == 13:
 		print("Hay NOT")
 	elif op == 14:
+
 		#GLOBALES
 		if 2500 <= res < 5000:
 			print(MemGlobal.int[res])
@@ -117,6 +125,10 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		elif 10000 <= res < 12500:
 			#pass
 			print(MemGlobal.str[res])
+
+		#LOCALES
+		if 22500 <= res < 25000:
+			print(stackLocal[len(stackLocal) - 1].int[res])
 
 		#CONSTANTES
 		if 32500 <= res < 35000:
@@ -139,16 +151,24 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 	elif op == 18:
 		MaquinaVirtual(cuad[res].pos, cuad[res].op, cuad[res].oper1, cuad[res].oper2, cuad[res].res)
 	elif op == 19:
-		print("Hay ERA")
+		stackLocal.append(MemLocal)
+		#print(stackLocal)
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 20:
-		print("HAy GOSUB")
+		stackEstado.append(pos + 1)
+
 		MaquinaVirtual(cuad[res].pos, cuad[res].op, cuad[res].oper1, cuad[res].oper2, cuad[res].res)
 	elif op == 21:
-		print("Hay PARAM")
+		if 2500 <= oper1 < 5000:
+			parametro = MemGlobal.int[oper1]
+			stackLocal[len(stackLocal) - 1].int[MemLocalINTCont + MemLocalINTOffset] = parametro
+			#print(stackLocal)
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 22:
-		print("Hay RET")
+		siguienteCuad = stackEstado.pop()
+		stackLocal.pop()
+		#print(stackLocal)
+		MaquinaVirtual(cuad[siguienteCuad].pos, cuad[siguienteCuad].op, cuad[siguienteCuad].oper1, cuad[siguienteCuad].oper2, cuad[siguienteCuad].res)
 	elif op == 23:
 		print("Hay READ")
 

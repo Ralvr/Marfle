@@ -13,9 +13,9 @@ program uno {
     bool boolean;
     endvar;
 
-    func int fibonacci (int n) 
+    func void fibonacci (int n) 
     {
-        
+        print(n);
     }
     
     main ( ) {
@@ -34,6 +34,7 @@ program uno {
         boolean = true;
         a = 2 + 4;
         print(23);
+        fibonacci(a);
         print(a);
     }
 }

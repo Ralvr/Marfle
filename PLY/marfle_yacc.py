@@ -39,6 +39,8 @@ mem = collections.namedtuple('Memoria', 'int float bool str')
 MemConstante    =   mem({},{},{},{})
 MemTemporal     =   mem({},{},{},{})
 MemGlobal       =   mem({},{},{},{})
+MemLocal        =   mem({},{},{},{})
+stackLocalMaster = []
 
 ######  MEMORIA GLOBAL
 ##############                  INT
@@ -73,6 +75,20 @@ MemTempBOLOffset = 0
 ##############                  STRING
 MemTempSTRCont  = 30000
 MemTempSTROffset    = 0
+
+
+######  MEMORIA LOCAL
+MemLocalINTCont = 22500
+MemLocalINTOffset = 0
+
+MemLocalFLOCont = 25000
+MemLocalFLOOffset = 0
+
+MemLocalBOLCont = 27500
+MemLocalBOLOffset = 0
+
+MemLocalSTRCont = 30000
+MemLocalSTROffset = 0
 
 
 ######MEMORIA CONSTANTE
@@ -394,7 +410,7 @@ def p_asignacion(p):
     operIgualado = pilaO.pop()
     tipo2 = pTipos.pop()
     tipoRes = cuboSem[tipo2][tipo1][operador]
-    print(tipo2, tipo1, operador)
+    #print(tipo2, tipo1, operador)
     if tipoRes is not -1:
         global cont
         cuad.append(Cuadruplo(cont, operador, oper1, -1, operIgualado))
@@ -423,8 +439,18 @@ def p_foundID(p):
         pTipos.append(dirProc[modActual].vars[p[-1]].type)
         pilaO.append(dirProc[modActual].vars[p[-1]].dirV)
     elif p[-1] in dirProc[modActual].params:
-        pTipos.append(dirProc[modActual].params[p[-1]])
-        pilaO.append(p[-1])
+        if 22500 <= dirProc[modActual].params[p[-1]] < 25000:
+            pTipos.append(0)
+            pilaO.append(dirProc[modActual].params[p[-1]])
+        elif 25000 <= dirProc[modActual].params[p[-1]] < 27500:
+            pTipos.append(1)
+            pilaO.append(dirProc[modActual].params[p[-1]])
+        elif 27500 <= dirProc[modActual].params[p[-1]] < 30000:
+            pTipos.append(2)
+            pilaO.append(dirProc[modActual].params[p[-1]])
+        elif 30000 <= dirProc[modActual].params[p[-1]]:
+            pTipos.append(3)
+            pilaO.append(dirProc[modActual].params[p[-1]])
     elif p[-1] in dirProc:
         pass
     else:
@@ -679,7 +705,7 @@ def p_modparams(p):
                     |'''
 def p_foundParam(p):
     'foundParam :'
-    global modParamType, modActual, objActual
+    global modParamType, modActual, objActual, MemLocalINTCont, MemLocalINTOffset
     #print(p[-1])
     if objActual is not None and modActual is not None:
         objetos[objActual].mods[modActual].params[p[-1]] = modParamType
@@ -687,7 +713,13 @@ def p_foundParam(p):
     
     elif modActual is not None:
         #print(dirProc)
-        dirProc[modActual].params[p[-1]] = modParamType
+        if modParamType == 0:
+            dirLActual = MemLocalINTCont + MemLocalINTOffset
+            dirProc[modActual].params[p[-1]] = dirLActual
+            MemLocalINTOffset += 1
+        else:
+            dirProc[modActual].params[p[-1]] = modParamType
+        #dirProc[modActual].params[p[-1]] = modParamType
         #print(dirProc)
 
 def p_masmodparams(p):
@@ -797,7 +829,7 @@ def p_otrasconst(p):
 
 def p_foundNUMINT(p):
     'foundNUMINT   :'
-    global MemConstINT, MemConstanteINTOffset, MemConstanteINTCont
+    global MemConstINT, MemConstanteINTOffset, MemConstanteINTCont, modActual
     pTipos.append(0)
     if p[-1] in MemConstante.int:
         pilaO.append(MemConstante.int[p[-1]])
@@ -1016,6 +1048,7 @@ def main(arg):
         for objeto in objetos:
             print("%s\n%s" % (objetos[objeto].vars,objetos[objeto].mods))
         '''
+        #print(dirProc)
 
         print("\n\n")
         if arg == 'r':
