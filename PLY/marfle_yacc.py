@@ -78,16 +78,16 @@ MemTempSTROffset    = 0
 
 
 ######  MEMORIA LOCAL
-MemLocalINTCont = 22500
+MemLocalINTCont = 12500
 MemLocalINTOffset = 0
 
-MemLocalFLOCont = 25000
+MemLocalFLOCont = 15000
 MemLocalFLOOffset = 0
 
-MemLocalBOLCont = 27500
+MemLocalBOLCont = 17500
 MemLocalBOLOffset = 0
 
-MemLocalSTRCont = 30000
+MemLocalSTRCont = 20000
 MemLocalSTROffset = 0
 
 
@@ -343,7 +343,7 @@ def p_insertVar(p):
             sys.exit("Variable ya declarada\n")
     else:
         if p[-3] not in dirProc[modActual].vars:
-            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset
+            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset, MemLocalINTCont, MemLocalINTOffset
             if modActual == 'main':
                 if vartype == 0:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalINTCont + MemGlobalINTOffset)
@@ -359,7 +359,11 @@ def p_insertVar(p):
                     MemGlobalSTROffset += 1
 
             else:
-                dirProc[modActual].vars[p[-3]] = var(vartype, dim, 0)
+                if vartype == 0:
+                    dirProc[modActual].vars[p[-3]] =var(vartype, dim, MemLocalINTCont + MemLocalINTOffset)
+                    MemLocalINTOffset += 1 
+                else:    
+                    dirProc[modActual].vars[p[-3]] = var(vartype, dim, 0)
         else:
             sys.exit("Variable ya declarada\n")
     #print(dirProc[modActual])
@@ -439,16 +443,16 @@ def p_foundID(p):
         pTipos.append(dirProc[modActual].vars[p[-1]].type)
         pilaO.append(dirProc[modActual].vars[p[-1]].dirV)
     elif p[-1] in dirProc[modActual].params:
-        if 22500 <= dirProc[modActual].params[p[-1]] < 25000:
+        if 12500 <= dirProc[modActual].params[p[-1]] < 15000:
             pTipos.append(0)
             pilaO.append(dirProc[modActual].params[p[-1]])
-        elif 25000 <= dirProc[modActual].params[p[-1]] < 27500:
+        elif 15000 <= dirProc[modActual].params[p[-1]] < 17500:
             pTipos.append(1)
             pilaO.append(dirProc[modActual].params[p[-1]])
-        elif 27500 <= dirProc[modActual].params[p[-1]] < 30000:
+        elif 17500 <= dirProc[modActual].params[p[-1]] < 20000:
             pTipos.append(2)
             pilaO.append(dirProc[modActual].params[p[-1]])
-        elif 30000 <= dirProc[modActual].params[p[-1]]:
+        elif 20000 <= dirProc[modActual].params[p[-1]] < 22500:
             pTipos.append(3)
             pilaO.append(dirProc[modActual].params[p[-1]])
     elif p[-1] in dirProc:
@@ -622,6 +626,7 @@ def p_genCuadMUDI(p):
     tipo1 = pTipos.pop()
     global temporal, cont
     tipoRes = cuboSem[tipo1][tipo2][operador]
+    #print(tipoRes)
     if(tipoRes != -1):
         global MemTempINTCont, MemTempINTOffset, MemTempFLOCont, MemTempFLOOffset, MemTempBOLCont, MemTempBOLOffset, MemTempSTRCont, MemTempSTROffset, modActual
         pTipos.append(tipoRes)
@@ -659,9 +664,45 @@ def p_genCuadMUDI(p):
                 else:
                     sys.exit("Demasiadas temporales string")
         else:
-            pilaO.append("t_%s" % temporal)
+            if tipoRes == 0:
+                if MemTempINTOffset < 2500:
+                    MemTemporal.int[MemTempINTCont      +   MemTempINTOffset] = "t_%s" % temporal
+                    pilaO.append(MemTempINTCont      +   MemTempINTOffset)
+                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempINTCont + MemTempINTOffset))
+                    MemTempINTOffset += 1
+                else:
+                    sys.exit("Demasiadas temporales enteras.")
+            elif tipoRes == 1:
+                if MemTempFLOOffset < 2500:
+                    MemTemporal.float[MemTempFLOCont    +   MemTempFLOOffset] = "t_%s" % temporal
+                    pilaO.append(MemTempFLOCont    +   MemTempFLOOffset)
+                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempFLOCont + MemTempFLOOffset))
+                    MemTempFLOOffset += 1
+                else:
+                    sys.exit("Demasiadas Temporales flotantes")
+            elif tipoRes == 2:
+                if MemTempBOLOffset < 2500:
+                    MemTemporal.bool[MemTempBOLCont     +   MemTempBOLOffset] = "t_%s" % temporal
+                    pilaO.append(MemTempBOLCont     +   MemTempBOLOffset)
+                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempBOLCont + MemTempBOLOffset))
+                    MemTempBOLOffset += 1
+                else:
+                    sys.exit("Demasiadas Temporales booleanas")
+            elif tipoRes == 3:
+                if MemTempSTROffset < 2500:
+                    MemTemporal.str[MemTempSTRCont      +   MemTempSTROffset] = "t_%s" % temporal
+                    pilaO.append(MemTempSTRCont      +   MemTempSTROffset)
+                    cuad.append(Cuadruplo(cont, operador, oper1, oper2, MemTempSTRCont + MemTempSTROffset))
+                    MemTempSTROffset += 1
+                else:
+                    sys.exit("Demasiadas temporales string")
+
+
+            #dirAgregar = MemTempINTCont + MemTempINTOffset
+            #pilaO.append(dirAgregar)
             #cuadruplos.write("(%s,\t%s,\t%s,\tt_%s)\n" % (operador,oper1,oper2,temporal))
-            cuad.append(Cuadruplo(cont, operador, oper1, oper2, "t_%s" % temporal))
+            #cuad.append(Cuadruplo(cont, operador, oper1, oper2, dirAgregar))
+            #MemTempINTOffset += 1
     cont += 1
     temporal += 1
 
