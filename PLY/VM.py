@@ -406,19 +406,25 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		#Es una variable global entera
 		if 2500 <= res < 5000:
 			if res in MemGlobal.int:
-				if 32500 <= oper1 < 35000:
+				if 2500 <= oper1 < 5000:
+					MemGlobal.int[res] = MemGlobal.int[oper1]
+				elif 32500 <= oper1 < 35000:
 					MemGlobal.int[res] = invMemConstINT[oper1]
 				elif 22500 <= oper1 < 25000:
 					MemGlobal.int[res] = MemTemporal.int[oper1]
 			else:
-				if 32500 <= oper1 < 35000:
+				if 2500 <= oper1 < 5000:
+					MemGlobal.int[res] = MemGlobal.int[oper1]
+				elif 32500 <= oper1 < 35000:
 					MemGlobal.int[res] = invMemConstINT[oper1]
 				elif 22500 <= oper1 < 25000:
 					MemGlobal.int[res] = MemTemporal.int[oper1]
 
 		#Es una variable global Flotante
 		if 5000 <= res < 7500:
-			pass
+			if res in MemGlobal.float:
+				if 5000 <= oper1 < 7500:
+					MemGlobal.float[res] = MemGlobal.float
 		
 		#Es una Variable global Booleana
 		elif 7500 <= res < 10000:
@@ -518,7 +524,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 13:
-		print("Hay NOT")
+		print("Hay NOT") #No se usa en el producto final
 	elif op == 14:	#PRINT
 
 		#GLOBALES

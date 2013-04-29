@@ -40,6 +40,7 @@ MemConstante    =   mem({},{},{},{})
 MemTemporal     =   mem({},{},{},{})
 MemGlobal       =   mem({},{},{},{})
 MemLocal        =   mem({},{},{},{})
+MemObjeto       =   mem({},{},{},{})
 stackLocalMaster = []
 
 ######  MEMORIA GLOBAL
@@ -110,6 +111,27 @@ MemConstanteBOLOffset = 0
 ##############                  STRING
 MemConstanteSTRCont = 40000
 MemConstanteSTROffset = 0
+
+#######MEMORIA DE OBJETOS
+
+tipoObjeto = {}
+
+
+
+varObjeto = {}
+#varObjetoOffset = 0
+
+MemObjetoINT = 50000
+MemObjetoINTOffset = 0
+
+MemObjetoFLO = 52500
+MemObjetoFLOOffset = 0
+
+MemObjetoBOL = 55000
+MemObjetoBOLOffset = 0
+
+MemObjetoSTR = 57500
+MemObjetoSTROffset = 0
 
 
 
@@ -343,7 +365,8 @@ def p_insertVar(p):
             sys.exit("Variable ya declarada\n")
     else:
         if p[-3] not in dirProc[modActual].vars:
-            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset, MemLocalINTCont, MemLocalINTOffset
+            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset, MemLocalINTCont, MemLocalINTOffset, varObjeto
+            #print(vartype)
             if modActual == 'main':
                 if vartype == 0:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalINTCont + MemGlobalINTOffset)
@@ -357,6 +380,10 @@ def p_insertVar(p):
                 elif vartype == 3:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalSTRCont + MemGlobalSTROffset)
                     MemGlobalSTROffset += 1
+                elif vartype in objetos:
+                    dirProc[modActual].vars[p[-3]] = var(vartype, dim, 0)
+                    varObjeto[p[-3]] = mem({},{},{},{})
+                    #tipoObjeto[vartype] = varObjeto + varObjetoOffset
 
             else:
                 if vartype == 0:
@@ -407,7 +434,7 @@ def p_return(p):
 
 #ASIGNACION
 def p_asignacion(p):
-    'asignacion :   IDENTI foundID dimension IGUAL foundEQ exp SEMCOL'
+    'asignacion :   IDENTI tieneObjeto dimension IGUAL foundEQ exp SEMCOL'
     operador = pOper.pop()
     oper1 = pilaO.pop()
     tipo1 = pTipos.pop()
@@ -422,11 +449,19 @@ def p_asignacion(p):
     else:
         sys.exit("Tipos Inválidos en %s" % p.lexer.lineno)
     #print(pilaO)
+
+def p_tieneObjeto(p):
+    '''tieneObjeto  :   PUNTO IDENTI foundID
+                    |   foundID'''
     
 def p_foundID(p):
     'foundID    :'
     global modActual, objActual, cont
+    #print(objActual)
     #El primer IF es el que revisa la parte de las variables de objeto
+    #print(pilaO)
+    #print(p[-1], p[-3])
+    #print(pTipos)
     if objActual is not None:
         #Variables de objeto
         if p[-1] in objetos[objActual].vars:
@@ -437,11 +472,16 @@ def p_foundID(p):
             pilaO.append(p[-1])
         elif p[-1] in objetos[objActual].mods[modActual].params:
             pTipos.append(objetos[objActual].mods[modActual].params[p[-1]])
-            pilaO.append(p[-1]) 
+            pilaO.append(p[-1])
+        #print(pTipos)
         
     elif p[-1] in dirProc[modActual].vars:
-        pTipos.append(dirProc[modActual].vars[p[-1]].type)
-        pilaO.append(dirProc[modActual].vars[p[-1]].dirV)
+        tipo = dirProc[modActual].vars[p[-1]].type
+        if tipo == 0 or tipo == 1 or tipo == 2 or tipo == 3:
+            pTipos.append(dirProc[modActual].vars[p[-1]].type)
+            pilaO.append(dirProc[modActual].vars[p[-1]].dirV)
+        else:
+            pass
     elif p[-1] in dirProc[modActual].params:
         if 12500 <= dirProc[modActual].params[p[-1]] < 15000:
             pTipos.append(0)
@@ -457,8 +497,50 @@ def p_foundID(p):
             pilaO.append(dirProc[modActual].params[p[-1]])
     elif p[-1] in dirProc:
         pass
+    #Revisa variables de tipo objeto
+    elif dirProc[modActual].vars[p[-3]].type in objetos:
+        global MemObjeto, MemObjetoINT, MemObjetoINTOffset, MemObjetoFLO, MemObjetoFLOOffset, MemObjetoBOL, MemObjetoBOLOffset, MemObjetoSTR, MemObjetoSTROffset
+        objActual = dirProc[modActual].vars[p[-3]].type
+        tipoEs = objetos[objActual].vars[p[-1]].type
+        #print(pTipos)
+        #print(tipoEs)
+        pTipos.append(tipoEs)
+        #print(pTipos)
+        if tipoEs == 0:
+            #print(varObjeto)
+            if p[-3] in varObjeto and p[-1] in varObjeto[p[-3]].int:
+                pilaO.append(varObjeto[p[-3]].int[p[-1]])
+            else:
+                varObjeto[p[-3]].int[p[-1]] = MemObjetoINT + MemObjetoINTOffset
+                MemObjetoINTOffset += 1
+                pilaO.append(varObjeto[p[-3]].int[p[-1]])
+        elif tipoEs == 1:
+            if p[-3] in varObjeto and p[-1] in varObjeto[p[-3]].float:
+                pilaO.append(varObjeto[p[-3]].float[p[-1]])
+            else:
+                varObjeto[p[-3]].float[p[-1]] = MemObjetoFLO + MemObjetoFLOOffset
+                MemObjetoFLOOffset += 1
+                pilaO.append(varObjeto[p[-3]].float[p[-1]])
+        elif tipoEs == 2:
+            if p[-3] in varObjeto and p[-1] in varObjeto[p[-3]].bool:
+                pilaO.append(varObjeto[p[-3]].bool[p[-1]])
+            else:
+                varObjeto[p[-3]].bool[p[-1]] = MemObjetoBOL + MemObjetoBOLOffset
+                MemObjetoBOLOffset += 1
+                pilaO.append(varObjeto[p[-3]].bool[p[-1]])
+        elif tipoEs == 3:
+            if p[-3] in varObjeto and p[-1] in varObjeto[p[-3]].str:
+                pilaO.append(varObjeto[p[-3]].str[p[-1]])
+            else:
+                varObjeto[p[-3]].str[p[-1]] = MemObjetoSTR + MemObjetoSTROffset
+                MemObjetoSTROffset += 1
+                pilaO.append(varObjeto[p[-3]].str[p[-1]])
+        objActual = None
+    #    print(pTipos)
     else:
         sys.exit("Variable NO declarada!! %s" % (p.lexer.lineno))
+
+    #print(pTipos)
 
 def p_foundEQ(p):
     'foundEQ    :'
@@ -625,6 +707,7 @@ def p_genCuadMUDI(p):
     tipo2 = pTipos.pop()
     tipo1 = pTipos.pop()
     global temporal, cont
+    #print(tipo1, tipo2)
     tipoRes = cuboSem[tipo1][tipo2][operador]
     #print(tipoRes)
     if(tipoRes != -1):
@@ -819,9 +902,33 @@ def p_cteid(p):
     'cteid  :   IDENTI foundID funcdimobj'
     
 def p_funcdimobj(p):
-    '''funcdimobj   :   LPAREN generaERA llamaParam RPAREN resetPARAM SEMCOL
+    '''funcdimobj   :   metodoCall
                     |   dimension
-                    |   PUNTO IDENTI dimobjcall'''
+                    |   PUNTO IDENTI llamaObjeto ''' #dimobjcall
+
+def p_metodoCall(p):
+    'metodoCall     :   LPAREN generaERA llamaParam RPAREN resetPARAM SEMCOL'
+
+def p_llamaObjeto(p):
+    '''llamaObjeto      :   
+                        |   metodoCall'''
+    global objActual, modActual, MemObjeto, varObjeto
+    #print(modActual)
+    #print(objActual)
+    #print(p[-4], p[-2])
+    #print(dirProc[modActual].vars)
+    print(varObjeto)
+    objetoEs = dirProc[modActual].vars[p[-4]].type
+    #print(objetoEs, p[-1], p[-4])
+    if p[-1] in objetos[objetoEs].vars:
+        tipoEs = objetos[objetoEs].vars[p[-1]].type
+        #print(tipoEs)
+        #print(pTipos)
+        pTipos.append(tipoEs)
+        #print(pTipos)
+        pilaO.append(varObjeto[p[-4]].int[p[-1]])
+    else:
+        pass
 
 def p_llamaParam(p):
     '''llamaParam   :   exp generaPARAM mascall
@@ -857,9 +964,9 @@ def p_resetPARAM(p):
 
 
 
-def p_dimobjcall(p):
-    '''dimobjcall   :   dimension
-                    |   LPAREN exp mascall RPAREN SEMCOL'''
+#def p_dimobjcall(p):
+#    '''dimobjcall   :   LPAREN generaERA llamaParam RPAREN resetPARAM SEMCOL
+#                    |   dimension''' #LPAREN exp mascall RPAREN SEMCOL
 
 def p_otrasconst(p):
     '''otrasconst   :   CONFLO foundNUMFLO
@@ -939,15 +1046,22 @@ def p_foundBOOL(p):
 #TIPO
 def p_tipo(p):
     '''tipo :   tipos
-            |   IDENTI isobject'''
+            |   IDENTI'''
+    #print(p[1])
+    if p[1] is not None:
+        global vartype
+        if p[1] in objetos:
+            vartype = p[1]
+        else:
+            sys.exit("Objeto \"%s\" NO declarado!! Está en la línea %s" % (p[-1], p.lexer.lineno))
 
-def p_isobject(p):
+'''def p_isobject(p):
     'isobject   :   '
     global vartype
     if p[-1] in objetos:
         vartype = p[-1]
     else:
-        sys.exit("Objeto \"%s\" NO declarado!! Está en la línea %s" % (p[-1], p.lexer.lineno))
+        sys.exit '''
 
 #TIPOS
 def p_tipos(p):
@@ -980,8 +1094,7 @@ def p_tipos(p):
     
 #EXPRESION
 def p_expresion(p):
-    '''expresion    :   NOT exp
-                    |   exp compara'''
+    '''expresion    :   exp compara'''
 
 def p_compara(p):
     '''compara  :   MENQUE foundComp exp genCuadMUDI
@@ -1065,9 +1178,11 @@ def main(arg):
         s = open('testcase', 'r').read()
         yacc.parse(s)
         #print("\n%s\n" % dirProc)
+        #print("\n%s\n" % objetos)
 
         #print(pOper)
         #print(pilaO)
+        print(varObjeto)
 
         for cu in cuad:
             print("%s\t| %s,\t\t\t\t%s,\t\t\t\t%s,\t\t\t\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
