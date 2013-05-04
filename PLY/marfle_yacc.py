@@ -145,6 +145,8 @@ varname = ''
 vartype = ''
 vardim1 = ''
 vardim2 = ''
+retOp = ''
+retTyp = ''
 ################################################################################
 
 Dim = collections.namedtuple('Dim', 'lsup linf mn')
@@ -417,29 +419,36 @@ def p_tammatriz(p):
     global vardim2
     if len(p) > 1:
         dim['dim1'] = Dim(vardim1, 0, p[2])
-        #vardim1.append(p[2])
         dim['dim2'] = Dim(p[2], 0, 0)
-        #print(dim)
-        #print(vardim2)
 
 #RETURN
 def p_return(p):
     'return :   RETURN superexpresion SEMCOL'
-    global cont
+    global cont, retOp, retTyp, temporal, MemTempINTCont, MemTempINTOffset
+    print(pilaO)
     oper1 = pilaO.pop()
+    retOp = oper1
     tipo = pTipos.pop()
-    #cuadruplos.write("(16,\t,\t,\t%s)\n" % (oper1))
-    cuad.append(Cuadruplo(cont, '15', -1, -1, oper1))
+    retTyp = tipo
+    cuad.append(Cuadruplo(cont, 15, -1, -1, MemTempINTCont + MemTempINTOffset))
+    pilaO.append(MemTempINTCont + MemTempINTOffset)
+    pTipos.append(retTyp)
+    MemTempINTOffset += 1
     cont += 1
 
 #ASIGNACION
 def p_asignacion(p):
-    'asignacion :   IDENTI tieneObjeto dimension IGUAL foundEQ exp SEMCOL'
+    'asignacion :   IDENTI tieneObjeto haydimension IGUAL foundEQ exp SEMCOL'
+    print(pilaO)
+    for cu in cuad:
+        print(cu)
+    print("\n")
     operador = pOper.pop()
     oper1 = pilaO.pop()
     tipo1 = pTipos.pop()
     operIgualado = pilaO.pop()
     tipo2 = pTipos.pop()
+    print(tipo1, tipo2, operador)
     tipoRes = cuboSem[tipo2][tipo1][operador]
     #print(tipo2, tipo1, operador)
     if tipoRes is not -1:
@@ -450,18 +459,20 @@ def p_asignacion(p):
         sys.exit("Tipos Inválidos en %s" % p.lexer.lineno)
     #print(pilaO)
 
+def p_haydimension(p):
+    '''haydimension     :   
+                        |   dimension'''
+
 def p_tieneObjeto(p):
     '''tieneObjeto  :   PUNTO IDENTI foundID
                     |   foundID'''
+    global objActual, modActual
+    #print(objActual, modActual)
     
 def p_foundID(p):
     'foundID    :'
     global modActual, objActual, cont
-    #print(objActual)
-    #El primer IF es el que revisa la parte de las variables de objeto
-    #print(pilaO)
-    #print(p[-1], p[-3])
-    #print(pTipos)
+    #print(p[-1], modActual)
     if objActual is not None:
         #Variables de objeto
         if p[-1] in objetos[objActual].vars:
@@ -582,7 +593,7 @@ def p_genCuadIF(p):
     global cont
     res = pilaO.pop()
     tipo = pTipos.pop()
-    cuad.append(Cuadruplo(cont, '16', res, -1, -1))
+    cuad.append(Cuadruplo(cont, 16, res, -1, -1))
     pSaltos.append(cont)
     cont += 1
 
@@ -674,8 +685,7 @@ def p_for(p):
 
 #DIMENSION
 def p_dimension(p):
-    '''dimension    :   LCORCH exp RCORCH matriz
-                    |'''
+    '''dimension    :   LCORCH exp RCORCH matriz'''
 
 #MATRIZ
 def p_matriz(p):
@@ -700,6 +710,11 @@ def p_foundMUDI(p):
 
 def p_genCuadMUDI(p):
     'genCuadMUDI    :'
+    for cu in cuad:
+        print(cu)
+    print(pilaO)
+    print("\n")
+
     operador = pOper.pop()
     oper2 = pilaO.pop()
     oper1 = pilaO.pop()
@@ -779,13 +794,6 @@ def p_genCuadMUDI(p):
                     MemTempSTROffset += 1
                 else:
                     sys.exit("Demasiadas temporales string")
-
-
-            #dirAgregar = MemTempINTCont + MemTempINTOffset
-            #pilaO.append(dirAgregar)
-            #cuadruplos.write("(%s,\t%s,\t%s,\tt_%s)\n" % (operador,oper1,oper2,temporal))
-            #cuad.append(Cuadruplo(cont, operador, oper1, oper2, dirAgregar))
-            #MemTempINTOffset += 1
     cont += 1
     temporal += 1
 
@@ -899,36 +907,34 @@ def p_varcte(p):
                 |   cteid'''
 
 def p_cteid(p):
-    'cteid  :   IDENTI foundID funcdimobj'
+    'cteid  :   IDENTI funcdimobj'
+    #print(objActual, p[1])
     
 def p_funcdimobj(p):
     '''funcdimobj   :   metodoCall
                     |   dimension
-                    |   PUNTO IDENTI llamaObjeto ''' #dimobjcall
+                    |   PUNTO IDENTI llamaObjeto limpia
+                    |   foundID''' #dimobjcall
+
+def p_limpia(p):
+    'limpia     :   '
+    global objActual
+    objActual = None
 
 def p_metodoCall(p):
     'metodoCall     :   LPAREN generaERA llamaParam RPAREN resetPARAM SEMCOL'
+    global objActual
 
 def p_llamaObjeto(p):
-    '''llamaObjeto      :   
+    '''llamaObjeto      :   foundID
                         |   metodoCall'''
     global objActual, modActual, MemObjeto, varObjeto
-    #print(modActual)
-    #print(objActual)
-    #print(p[-4], p[-2])
-    #print(dirProc[modActual].vars)
-    print(varObjeto)
-    objetoEs = dirProc[modActual].vars[p[-4]].type
-    #print(objetoEs, p[-1], p[-4])
-    if p[-1] in objetos[objetoEs].vars:
-        tipoEs = objetos[objetoEs].vars[p[-1]].type
-        #print(tipoEs)
-        #print(pTipos)
-        pTipos.append(tipoEs)
-        #print(pTipos)
-        pilaO.append(varObjeto[p[-4]].int[p[-1]])
-    else:
-        pass
+    if p[-2] is ".":
+        objActual = dirProc[modActual].vars[p[-3]].type
+        if p[-1] in objetos[objActual].vars:
+            tipoEs = objetos[objActual].vars[p[-1]].type
+            pTipos.append(tipoEs)
+            pilaO.append(varObjeto[p[-3]].int[p[-1]])
 
 def p_llamaParam(p):
     '''llamaParam   :   exp generaPARAM mascall
@@ -940,11 +946,19 @@ def p_mascall(p):
 
 def p_generaERA(p):
     'generaERA    :    '
-    global cont, modActual, modSiguiente
-    cuad.append(Cuadruplo(cont, 19, -1, -1, p[-3]))
-    modSiguiente = p[-3]
-    cont += 1
-    #print(objetos)
+    global cont, modActual, modSiguiente, objActual
+    print(objActual, modActual, modSiguiente)
+    if p[-3] is not '.':
+        cuad.append(Cuadruplo(cont, 19, -1, -1, p[-2]))
+        modSiguiente = p[-2]
+        cont += 1
+    else:
+        cuad.append(Cuadruplo(cont, 19, -1, -1, p[-2]))
+        modSiguiente = p[-2]
+        #Hace que el método de objeto y el objeto estén sincronizados
+        objActual = dirProc[modActual].vars[p[-4]].type
+        cont += 1
+    print(modSiguiente)
 
 def p_generaPARAM(p):
     'generaPARAM    :   '
@@ -957,16 +971,18 @@ def p_generaPARAM(p):
 
 def p_resetPARAM(p):
     'resetPARAM     :   '
-    global modParams, modActual, cont, modSiguiente
+    global modParams, modActual, cont, modSiguiente, objActual, retOp, retTyp
     modParams = 1
-    cuad.append(Cuadruplo(cont, 20, -1, -1, dirProc[modSiguiente].inicio['inicio']))
+    if objActual is not None:
+        if modSiguiente in objetos[objActual].mods:
+            cuad.append(Cuadruplo(cont, 20, -1, -1, objetos[objActual].mods[modSiguiente].inicio['inicio']))
+    elif modActual in dirProc:
+        cuad.append(Cuadruplo(cont, 20, -1, -1, dirProc[modSiguiente].inicio['inicio']))
+    if retOp is not '':
+        pilaO.append(retOp)
+        pTipos.append(retTyp)
+        retOp = retTyp = ''
     cont += 1
-
-
-
-#def p_dimobjcall(p):
-#    '''dimobjcall   :   LPAREN generaERA llamaParam RPAREN resetPARAM SEMCOL
-#                    |   dimension''' #LPAREN exp mascall RPAREN SEMCOL
 
 def p_otrasconst(p):
     '''otrasconst   :   CONFLO foundNUMFLO
@@ -988,14 +1004,6 @@ def p_foundNUMINT(p):
     else:
         sys.exit("Demasiadas constantes enteras!!")
 
-    '''if p[-1] in MemConstINT:
-        pilaO.append(MemConstINT[p[-1]])    
-    else:
-        MemConstINT[p[-1]] = MemConstanteINTCont + MemConstanteINTOffset
-        pilaO.append(MemConstanteINTCont + MemConstanteINTOffset)
-        MemConstanteINTOffset += 1
-    #print(pTipos) '''
-
 def p_foundNUMFLO(p):
     'foundNUMFLO    :'
     global MemConstanteFLOOffset, MemConstanteFLOCont
@@ -1008,10 +1016,6 @@ def p_foundNUMFLO(p):
         MemConstanteFLOOffset += 1
     else:
         sys.exit("Demasiadas constantes flotantes")
-
-
-    #pilaO.append(p[-1])
-    #print(pTipos)
 
 def p_foundSTR(p):
     'foundSTR   :'
@@ -1182,7 +1186,7 @@ def main(arg):
 
         #print(pOper)
         #print(pilaO)
-        print(varObjeto)
+        #print(varObjeto)
 
         for cu in cuad:
             print("%s\t| %s,\t\t\t\t%s,\t\t\t\t%s,\t\t\t\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
