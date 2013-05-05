@@ -17,6 +17,8 @@ program uno {
     }
     
     int a;
+    int arr[3][4];
+    float arr2[4];
     int b;
     float d;
     derp wow;
@@ -32,18 +34,21 @@ program uno {
 
         if(n == 0 || n == 1)
         {
-            return(n);
+            print(n);
         }
         else
         {
-            return(fibonacci(n-1););
+            print(n);
         }
     }
     
     main ( ) {
         a = 5;
-        a = fibonacci(2);;
+        fibonacci(a);
         print(a);
+        b = 2 * a;
+        print(b);
+        arr[1][0] = 2;
         d = 3.4;
         print(d);
         a = 1 + 2 + 3 + 4 + 5 + 6 + 7;

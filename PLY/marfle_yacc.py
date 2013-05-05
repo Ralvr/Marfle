@@ -145,6 +145,7 @@ varname = ''
 vartype = ''
 vardim1 = ''
 vardim2 = ''
+m0 = 0
 retOp = ''
 retTyp = ''
 ################################################################################
@@ -340,8 +341,9 @@ def p_foundKeyword(p):
 
 def p_insertObjVar(p):
     'insertObjVar   :'
-    global visibilidad, vartype, vardim1, objActual
+    global visibilidad, vartype, vardim1, objActual, dim
     objetos[objActual].vars[p[-2]] = VarObj(visibilidad, vartype, dim)
+    dim = {}
     #print(objetos)
 
 def p_delVis(p):
@@ -367,25 +369,38 @@ def p_insertVar(p):
             sys.exit("Variable ya declarada\n")
     else:
         if p[-3] not in dirProc[modActual].vars:
-            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset, MemLocalINTCont, MemLocalINTOffset, varObjeto
+            global MemGlobalINTCont, MemGlobalINTOffset, MemGlobalFLOCont, MemGlobalFLOOffset, MemGlobalBOLCont, MemGlobalBOLOffset, MemGlobalSTRCont, MemGlobalSTROffset, MemLocalINTCont, MemLocalINTOffset, varObjeto, vardim1, vardim2, dim, m0
             #print(vartype)
             if modActual == 'main':
                 if vartype == 0:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalINTCont + MemGlobalINTOffset)
-                    MemGlobalINTOffset += 1
+                    if m0 is not 0:
+                        MemGlobalINTOffset +=  m0
+                    else:
+                        MemGlobalINTOffset +=  1
                 elif vartype == 1:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalFLOCont + MemGlobalFLOOffset)
-                    MemGlobalFLOOffset += 1
+                    if m0 is not 0:
+                        MemGlobalFLOOffset += m0
+                    else:
+                        MemGlobalFLOOffset += 1
                 elif vartype == 2:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalBOLCont + MemGlobalBOLOffset)
-                    MemGlobalBOLOffset += 1
+                    if m0 is not 0:
+                        MemGlobalBOLOffset += m0
+                    else:
+                        MemGlobalBOLOffset += 1
                 elif vartype == 3:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, MemGlobalSTRCont + MemGlobalSTROffset)
-                    MemGlobalSTROffset += 1
+                    if m0 is not 0:
+                        MemGlobalSTROffset += m0
+                    else:
+                        MemGlobalSTROffset += 1
                 elif vartype in objetos:
                     dirProc[modActual].vars[p[-3]] = var(vartype, dim, 0)
                     varObjeto[p[-3]] = mem({},{},{},{})
                     #tipoObjeto[vartype] = varObjeto + varObjetoOffset
+                m0 = 0
 
             else:
                 if vartype == 0:
@@ -397,6 +412,9 @@ def p_insertVar(p):
             sys.exit("Variable ya declarada\n")
     #print(dirProc[modActual])
     vardim1 = {}
+    vardim2 = {}
+    dim = {}
+
                     
 #TAMAÑO
 def p_tamano(p):
@@ -415,11 +433,12 @@ def p_metearr(p):
 #TAMMATRIZ
 def p_tammatriz(p):
     '''tammatriz    :   LCORCH CONINT RCORCH
-                    |'''
-    global vardim2
+                    |   '''
+    global vardim2, m0
     if len(p) > 1:
         dim['dim1'] = Dim(vardim1, 0, p[2])
         dim['dim2'] = Dim(p[2], 0, 0)
+        m0 = vardim1 * p[2]
 
 #RETURN
 def p_return(p):
@@ -438,11 +457,11 @@ def p_return(p):
 
 #ASIGNACION
 def p_asignacion(p):
-    'asignacion :   IDENTI tieneObjeto haydimension IGUAL foundEQ exp SEMCOL'
+    'asignacion :   IDENTI tieneObjeto IGUAL foundEQ exp SEMCOL'
     print(pilaO)
-    for cu in cuad:
-        print(cu)
-    print("\n")
+    '''for cu in cuad:
+                    print(cu)
+                print("\n")'''
     operador = pOper.pop()
     oper1 = pilaO.pop()
     tipo1 = pTipos.pop()
@@ -450,6 +469,7 @@ def p_asignacion(p):
     tipo2 = pTipos.pop()
     print(tipo1, tipo2, operador)
     tipoRes = cuboSem[tipo2][tipo1][operador]
+    print(tipoRes)
     #print(tipo2, tipo1, operador)
     if tipoRes is not -1:
         global cont
@@ -459,13 +479,12 @@ def p_asignacion(p):
         sys.exit("Tipos Inválidos en %s" % p.lexer.lineno)
     #print(pilaO)
 
-def p_haydimension(p):
-    '''haydimension     :   
-                        |   dimension'''
+
 
 def p_tieneObjeto(p):
     '''tieneObjeto  :   PUNTO IDENTI foundID
-                    |   foundID'''
+                    |   foundID
+                    |   dimension'''
     global objActual, modActual
     #print(objActual, modActual)
     
@@ -710,10 +729,6 @@ def p_foundMUDI(p):
 
 def p_genCuadMUDI(p):
     'genCuadMUDI    :'
-    for cu in cuad:
-        print(cu)
-    print(pilaO)
-    print("\n")
 
     operador = pOper.pop()
     oper2 = pilaO.pop()
@@ -1181,12 +1196,7 @@ def main(arg):
         yacc.yacc()
         s = open('testcase', 'r').read()
         yacc.parse(s)
-        #print("\n%s\n" % dirProc)
-        #print("\n%s\n" % objetos)
-
-        #print(pOper)
-        #print(pilaO)
-        #print(varObjeto)
+        print("\n%s\n" % dirProc)
 
         for cu in cuad:
             print("%s\t| %s,\t\t\t\t%s,\t\t\t\t%s,\t\t\t\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))

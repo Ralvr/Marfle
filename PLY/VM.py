@@ -100,7 +100,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			else:
 				sys.exit("Variable no inicializada MENOS")
 		elif 12500 <= oper1 < 15000:
-			print(stackLocal[len(stackLocal)-1])
+			#print(stackLocal[len(stackLocal)-1])
 			operResta1 = stackLocal[len(stackLocal) - 1].int[oper1]
 
 		#OPERADOR 2
@@ -137,8 +137,9 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			operMult1 = invMemConstINT[oper1]
 
 		#OPERADOR 2
+		print(MemGlobal, oper2, MemGlobal.int[oper2])
 		if 2500 <= oper2 < 5000:
-			if oper1 in MemGlobal.int[oper2]:
+			if oper2 in MemGlobal.int:
 				operMult2 = MemGlobal.int[oper2]
 			else:
 				sys.exit("Variable no inicializada POR")
@@ -368,7 +369,6 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			MemTemporal.bool[res] = False
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 9:
-		print("Hay IguIgu")
 		#OPERADOR 1
 		operador1 = operador2 = 0
 			#Es entero
@@ -378,7 +378,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			else:
 				sys.exit("Variable no inicializada")
 		elif 12500 <= oper1 < 15000:
-			print(stackLocal[len(stackLocal)-1])
+			#print(stackLocal[len(stackLocal)-1])
 			operador1 = stackLocal[len(stackLocal) - 1].int[oper1]
 		elif 22500 <= oper1 < 25000:
 			operador1 = MemTemporal.int[oper1]
@@ -403,7 +403,6 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			MemTemporal.bool[res] = True
 		else:
 			MemTemporal.bool[res] = False
-		print(operador1, operador2, MemTemporal.bool[res])
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 10:
 		#Es una variable global entera
@@ -455,7 +454,6 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		else:
 			print("DONE")
 	elif op == 11:
-		print("Hay AND")
 		#OPERADOR 1
 		operador1 = operador2 = 0
 			#Es entero
@@ -492,7 +490,6 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 12:
-		print("Hay OR")
 		#OPERADOR 1
 		operador1 = operador2 = 0
 			#Es entero
@@ -619,9 +616,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 	elif op == 15:
 		#print("Hola RETURN")
 		MaquinaVirtual(cuad[(pos+1)].pos, cuad[(pos+1)].op, cuad[(pos+1)].oper1, cuad[(pos+1)].oper2, cuad[(pos+1)].res)
-	elif op == 16:
-					#GOTOF
-		print("GOtof")
+	elif op == 16:	#GOTOF
 		if MemTemporal.bool[oper1] == False:
 			MaquinaVirtual(cuad[res].pos, cuad[res].op, cuad[res].oper1, cuad[res].oper2, cuad[res].res)
 		elif MemTemporal.bool[oper1] == True:
