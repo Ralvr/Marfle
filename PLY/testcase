@@ -48,14 +48,15 @@ program uno {
         a = 5;
         fibonacci(a);
         print(a);
-        dosie[a-4][a-3] = 4;
+        arr[a-3] = 2;
+        dosie[a-4][arr[a-3]] = 4;
+        print(dosie[a-4][arr[a-3]]);
         d = 3.4;
         b = 2 * a;
         print(b);
-        arr[a-3] = 2;
         print(arr[a-3]);
         arr2[1+2] = 4.5;
-        
+        print(arr2[1+2]);
         print(d);
         a = 1 + 2 + 3 + 4 + 5 + 6 + 7;
         a = 5 - 2 + 1;

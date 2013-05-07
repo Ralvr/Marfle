@@ -41,9 +41,25 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		operSuma1 = operSuma2 = 0
 		#print(oper1, oper2, res)
 		#OPERADOR 1
+
+		#Arreglos para globales y locales
+		if type(oper1) is str:
+			dirDest = int(re.search(r'\d+', oper1).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operSuma1 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operSuma1 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operSuma1 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operSuma1 = MemLocal.int[destino]
+
 		  ##########				ENTEROS
 			#Constantes
-		if 32500 <= oper1 < 35000:
+		elif 32500 <= oper1 < 35000:
 			operSuma1 = invMemConstINT[oper1]
 			#Temporales
 		elif 22500 <= oper1 < 25000:
@@ -59,7 +75,21 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 
 		
 		#OPERADOR 2
-		if 32500 <= oper2 < 35000:
+		if type(oper2) is str:
+			dirDest = int(re.search(r'\d+', oper2).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operSuma2 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operSuma2 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operSuma2 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operSuma2 = MemLocal.int[destino]
+
+		elif 32500 <= oper2 < 35000:
 			operSuma2 = invMemConstINT[oper2]
 		elif 22500 <= oper2 < 25000:
 			operSuma2 = MemTemporal.int[oper2]
@@ -75,11 +105,8 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		##########				FLOTANTES
 
 
-		#print(operSuma1, operSuma2)
-		try:
-			MemTemporal.int[res] = operSuma1 + operSuma2
-		except:
-			MemTemporal.int[res] = operSuma1 + operSuma2
+		
+		MemTemporal.int[res] = operSuma1 + operSuma2
 		
 		#print(MemTemporal.int[res])
 
@@ -90,7 +117,22 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		operResta1 = operResta2 = 0
 
 		#OPERADOR 1
-		if 32500 <= oper1 < 35000:
+
+		if type(oper1) is str:
+			dirDest = int(re.search(r'\d+', oper1).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operResta1 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operResta1 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operResta1 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operResta1 = MemLocal.int[destino]
+
+		elif 32500 <= oper1 < 35000:
 			operResta1 = invMemConstINT[oper1]
 		elif 22500 <= oper1 < 25000:
 			operResta1 = MemTemporal.int[oper1]
@@ -104,7 +146,22 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			operResta1 = stackLocal[len(stackLocal) - 1].int[oper1]
 
 		#OPERADOR 2
-		if 32500 <= oper2 < 35000:
+
+		if type(oper2) is str:
+			dirDest = int(re.search(r'\d+', oper2).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operResta2 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operResta2 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operResta2 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operResta2 = MemLocal.int[destino]
+
+		elif 32500 <= oper2 < 35000:
 			operResta2 = invMemConstINT[oper2]
 		elif 22500 <= oper2 < 25000:
 			operResta2 = MemTemporal.int[oper2]
@@ -124,7 +181,22 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		operMult1 = operMult2 = 0
 
 		#OPERADOR 1
-		if 2500 <= oper1 < 5000:
+
+		if type(oper1) is str:
+			dirDest = int(re.search(r'\d+', oper1).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operMulti1 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operMulti1 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operMulti1 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operMulti1 = MemLocal.int[destino]
+
+		elif 2500 <= oper1 < 5000:
 			if oper1 in MemGlobal.int[oper1]:
 				operMult1 = MemGlobal.int[oper1]
 			else:
@@ -137,8 +209,22 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			operMult1 = invMemConstINT[oper1]
 
 		#OPERADOR 2
-		print(MemGlobal, oper2, MemGlobal.int[oper2])
-		if 2500 <= oper2 < 5000:
+
+		if type(oper2) is str:
+			dirDest = int(re.search(r'\d+', oper2).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operMulti2 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operMulti2 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operMulti2 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operMulti2 = MemLocal.int[destino]
+		
+		elif 2500 <= oper2 < 5000:
 			if oper2 in MemGlobal.int:
 				operMult2 = MemGlobal.int[oper2]
 			else:
@@ -151,17 +237,30 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			operMult2 = invMemConstINT[oper2]
 
 
-		##### OTROS TIPOS
 
 		MemTemporal.int[res] = operMult1 * operMult2
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 3:
 ###########			DIVISION
-		print("Hay DIVISION")
 		operDiv1 = operDiv2 = 0
 		###			ENTEROS
-			###			OPERADOR 1
-		if 2500 <= oper1 < 5000:
+		###			OPERADOR 1
+
+		if type(oper1) is str:
+			dirDest = int(re.search(r'\d+', oper1).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operDiv1 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operDiv1 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operDiv1 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operDiv1 = MemLocal.int[destino]
+
+		elif 2500 <= oper1 < 5000:
 			if oper1 in MemGlobal.int[oper1]:
 				operDiv1 = MemGlobal.int[oper1]
 			else:
@@ -174,6 +273,21 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			operDiv1 = invMemConstINT[oper1]
 
 			###			OPERADOR 2
+
+		if type(oper2) is str:
+			dirDest = int(re.search(r'\d+', oper2).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					operDiv2 = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					operDiv2 = MemGlobal.float[destino]
+				elif 12500 <= destino < 15000:
+					operDiv2 = MemLocal.int[destino]
+				elif 15000 <= destino < 17500:
+					operDiv2 = MemLocal.int[destino]
+
 		if 2500 <= oper2 < 5000:
 			if oper2 in MemGlobal.int[oper2]:
 				operDiv2 = MemGlobal.int[oper2]
@@ -408,7 +522,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		if type(res) is str:
 			dirDest = int(re.search(r'\d+', res).group())
 			if 22500 <= dirDest < 25000:
-				print(MemTemporal.int)
+				#print(MemTemporal.int)
 				destino = MemTemporal.int[dirDest]
 				if 2500 <= destino < 5000:
 					if 2500 <= oper1 < 5000:
@@ -631,6 +745,13 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 				destino = MemTemporal.int[dirDest]
 				if 2500 <= destino < 5000:
 					print(MemGlobal.int[destino])
+				elif 5000 <= destino < 7500:
+					print(MemGlobal.float[destino])
+				elif 7500 <= destino < 10000:
+					print(MemGlobal.bool[destino])
+				elif 10000 <= destino < 12500:
+					print(MemGlobal.str[destino])
+
 				'''elif 12500 <= oper1 < 15000:
 					MemGlobal.int[destino] = MemLocal.int[oper1]
 				elif 32500 <= oper1 < 35000:
@@ -642,7 +763,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		elif 2500 <= res < 5000:
 			print(MemGlobal.int[res])
 		elif 5000 <= res < 7500:
-			print(MemGlobal.float)
+			print(MemGlobal.float[res])
 			pass
 		elif 7500 <= res < 10000:
 			pass
@@ -718,8 +839,25 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		print("Hay READ")
 	elif op == 24:
 		#print(oper1, oper2, res, invMemConstINT, MemTemporal)
-		if 22500 <= oper1 < 25000:
+		if type(oper1) is str:
+			dirDest = int(re.search(r'\d+', oper1).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					indice = MemGlobal.int[destino]
+				elif 5000 <= destino < 7500:
+					if 5000 <= oper1 < 7500:
+						MemGlobal.float[destino] = MemGlobal.float[oper1]
+					elif 15000 <= oper1 < 17500:
+						MemGlobal.float[destino] = MemLocal.float[oper1]
+					elif 25000 <= oper1 < 27500:
+						MemGlobal.float[destino] = MemTemporal.float[oper1]
+					elif 35000 <= oper1 < 37500:
+						MemGlobal.float[destino] = invMemConstFLO[oper1]
+		elif 22500 <= oper1 < 25000:
 			indice = MemTemporal.int[oper1]
+
 		if indice < oper2 or indice > res:
 			sys.exit("Índice fuera de rango")
 		else:

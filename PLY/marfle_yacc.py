@@ -213,15 +213,12 @@ precedence = (
 
 # PROGRAM
 def p_program(p):
-    'program : PROGRAM IDENTI semCreaDP cuadInicial LBRACK progobj progvars progmod main RBRACK'
+    'program : PROGRAM IDENTI semCreaDP cuadInicial LBRACK progobj vars progmod main RBRACK'
     print("\n***Entrada aceptada***\n")
 
 def p_progobj(p):
     '''progobj  : objeto progobj
                 |'''
-
-def p_progvars(p):
-    '''progvars : vars'''
 
 def p_progmod(p):
     '''progmod  : modulo progmod
@@ -229,7 +226,7 @@ def p_progmod(p):
 
 #####SEMÁNTICA DE PROGRAM
 def p_semCreaDP(p):
-    'semCreaDP  :'
+    'semCreaDP  :   '
     global dirProc, modActual, cont
     #dirProc.append(DirProc(p[-1], 'global', []))
     dirProc['main'] = DirProc('global', {}, {}, cont)
@@ -447,7 +444,7 @@ def p_tammatriz(p):
 def p_return(p):
     'return :   RETURN superexpresion SEMCOL'
     global cont, retOp, retTyp, temporal, MemTempINTCont, MemTempINTOffset
-    print(pilaO)
+    #print(pilaO)
     oper1 = pilaO.pop()
     retOp = oper1
     tipo = pTipos.pop()
@@ -461,7 +458,7 @@ def p_return(p):
 #ASIGNACION
 def p_asignacion(p):
     'asignacion :   IDENTI tieneObjeto IGUAL foundEQ exp SEMCOL'
-    print(pilaO)
+    #print(pilaO)
     '''for cu in cuad:
                     print(cu)
                 print("\n")'''
@@ -470,9 +467,9 @@ def p_asignacion(p):
     tipo1 = pTipos.pop()
     operIgualado = pilaO.pop()
     tipo2 = pTipos.pop()
-    print(tipo1, tipo2, operador)
+    #print(tipo1, tipo2, operador)
     tipoRes = cuboSem[tipo1][tipo2][operador]
-    print(tipoRes)
+    #print(tipoRes)
     #print(tipo2, tipo1, operador)
     if tipoRes is not -1:
         global cont
@@ -724,57 +721,89 @@ def p_esDimensionada(p):
 
 def p_segParte(p):
     'segParte   :   '
-    global modActual, cont, dim
-    print(dirProc[modActual].vars[p[-5]].dim)
+    global modActual, cont, dim, MemTempINTCont, MemTempINTOffset, MemConstanteINTCont, MemConstanteINTOffset
+    #print(dirProc[modActual].vars[p[-5]].dim)
     lsup = dirProc[modActual].vars[p[-5]].dim['dim1'].lsup
     linf = dirProc[modActual].vars[p[-5]].dim['dim1'].linf
     cuad.append(Cuadruplo(cont, 24, pilaO[len(pilaO)-1], linf, lsup))
     cont += 1
 
-    if pilaDim[len(pilaDim)-1].dim > 1:
-        pass
-    
-    print(pilaDim)
+    #Verifica que haya una segunda dimensión
+    if 'dim2' in dirProc[modActual].vars[p[-5]].dim:
+    #    print("Hay una segunda dimension")
+        auxiliar =pilaO.pop()
+        if dirProc[modActual].vars[p[-5]].dim['dim1'].mn in MemConstante.int:
+            mN = MemConstante.int[dirProc[modActual].vars[p[-5]].dim['dim1'].mn]
+        else:
+            MemConstante.int[dirProc[modActual].vars[p[-5]].dim['dim1'].mn] = MemConstanteINTCont + MemConstanteINTOffset
+            MemConstanteINTOffset += 1
+            mN = MemConstante.int[dirProc[modActual].vars[p[-5]].dim['dim1'].mn]
+        cuad.append(Cuadruplo(cont, 2, auxiliar, mN, MemTempINTCont + MemTempINTOffset))
+        pilaO.append(MemTempINTCont + MemTempINTOffset)
+        MemTempINTOffset += 1
+        cont += 1
+    #print(pilaDim)
 
 def p_soloUnaDim(p):
     'soloUnaDim     :   '
     global MemTempINTCont, MemTempINTOffset, cont, modActual, MemConstanteINTOffset, MemConstanteINTCont, MemConstanteFLOCont, MemConstanteFLOOffset, MemConstanteBOLCont, MemConstanteBOLOffset, MemConstanteSTRCont, MemConstanteSTROffset
     auxiliar = pilaO.pop()
-    if 'dim2' in dirProc[modActual].vars[p[-6]].dim:
-        if dirProc[modActual].vars[p[-6]].dim['dim1'].mn in MemConstante.int:
-            mN = MemConstante.int[dirProc[modActual].vars[p[-6]].dim['dim1'].mn]
-        else:
-            MemConstante.int[dirProc[modActual].vars[p[-6]].dim['dim1'].mn] = MemConstanteINTCont + MemConstanteINTOffset
-            MemConstanteINTOffset += 1
-            mN = MemConstante.int[dirProc[modActual].vars[p[-6]].dim['dim1'].mn]
-        cuad.append(Cuadruplo(cont, 2, auxiliar, mN, MemTempINTCont + MemTempINTOffset))
-        pilaO.append(MemTempINTCont + MemTempINTOffset)
-        MemTempINTOffset += 1
-        cont += 1
-
-    else:
-
-        base = dirProc[modActual].vars[p[-6]].dirV
-        #if 2500 <= base < 5000:
-        if base not in MemConstante.int:
-            MemConstante.int[base] = MemConstanteINTCont + MemConstanteINTOffset
-            MemConstanteINTOffset += 1
-        cuad.append(Cuadruplo(cont, 0, auxiliar, 0, MemTempINTCont + MemTempINTOffset))
-        temporal = MemTempINTCont + MemTempINTOffset
-        MemTempINTOffset += 1
-        cont += 1
-        cuad.append(Cuadruplo(cont, 0, temporal, MemConstante.int[base], MemTempINTCont + MemTempINTOffset))
-        pilaO.append(("_%s" % (MemTempINTCont + MemTempINTOffset)))
-        MemTempINTOffset += 1
+    base = dirProc[modActual].vars[p[-6]].dirV
+    if base not in MemConstante.int:
+        MemConstante.int[base] = MemConstanteINTCont + MemConstanteINTOffset
+        MemConstanteINTOffset += 1
+    if 0 not in MemConstante.int:
+        MemConstante.int[0] = MemConstanteINTCont + MemConstanteINTOffset
+        MemConstanteINTOffset += 1
+    cuad.append(Cuadruplo(cont, 0, auxiliar, MemConstante.int[0], MemTempINTCont + MemTempINTOffset))
+    temporal = MemTempINTCont + MemTempINTOffset
+    MemTempINTOffset += 1
+    cont += 1
+    cuad.append(Cuadruplo(cont, 0, temporal, MemConstante.int[base], MemTempINTCont + MemTempINTOffset))
+    pilaO.append(("_%s" % (MemTempINTCont + MemTempINTOffset)))
+    MemTempINTOffset += 1
     cont += 1
     pilaDim.pop()
 
 def p_sonDosDims(p):
     'sonDosDims     :   '
-    global cont, modActual, MemTempINTCont, MemTempINTOffset
-    print(p[-8])
-    print(dirProc[modActual])
-    sys.exit()
+    global cont, modActual, MemTempINTCont, MemTempINTOffset, MemConstanteINTCont, MemConstanteINTOffset
+    #print(p[-8])
+    #print(dirProc[modActual])
+    #Verifica que el índice esté dentro de los límites de la dimensión
+    base = dirProc[modActual].vars[p[-8]].dirV
+
+    if base not in MemConstante.int:
+        MemConstante.int[base] = MemConstanteINTCont + MemConstanteINTOffset
+        MemConstanteINTOffset += 1
+
+    lsup = dirProc[modActual].vars[p[-8]].dim['dim2'].lsup
+    linf = dirProc[modActual].vars[p[-8]].dim['dim2'].linf
+    cuad.append(Cuadruplo(cont, 24, pilaO[len(pilaO)-1], linf, lsup))
+    cont += 1
+
+    auxiliar2 = pilaO.pop()
+    auxiliar1 = pilaO.pop()
+    cuad.append(Cuadruplo(cont, 0,  auxiliar1,  auxiliar2,  MemTempINTCont + MemTempINTOffset))
+    pilaO.append(MemTempINTCont + MemTempINTOffset)
+    MemTempINTOffset += 1
+    cont += 1
+
+    auxFinal = pilaO.pop()
+    cuad.append(Cuadruplo(cont, 0, auxFinal, MemConstante.int[0], MemTempINTCont + MemTempINTOffset))
+    pilaO.append(MemTempINTCont + MemTempINTOffset)
+    MemTempINTOffset += 1
+    cont += 1
+
+    temp = pilaO.pop()
+    cuad.append(Cuadruplo(cont, 0, temp, MemConstante.int[base], MemTempINTCont + MemTempINTOffset))
+    pilaO.append("_%s" % (MemTempINTCont + MemTempINTOffset))
+    MemTempINTOffset += 1
+    cont += 1
+    #print(MemConstante.int)
+    #for cu in cuad:
+    #    print(cu)
+    #sys.exit()
 
 
 #TERMINO
