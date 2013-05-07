@@ -3,6 +3,7 @@ program uno {
     {
         public int x;
         public float barf;
+        public int obArr[3];
         public bool bolly;
         public string stringy;
         private int ark;
@@ -17,7 +18,8 @@ program uno {
     }
     
     int a;
-    int arr[3][4];
+    int arr[5];
+    int dosie[4][5];
     float arr2[4];
     int b;
     float d;
@@ -46,10 +48,14 @@ program uno {
         a = 5;
         fibonacci(a);
         print(a);
+        dosie[a-4][a-3] = 4;
+        d = 3.4;
         b = 2 * a;
         print(b);
-        arr[1][0] = 2;
-        d = 3.4;
+        arr[a-3] = 2;
+        print(arr[a-3]);
+        arr2[1+2] = 4.5;
+        
         print(d);
         a = 1 + 2 + 3 + 4 + 5 + 6 + 7;
         a = 5 - 2 + 1;

@@ -146,6 +146,8 @@ vartype = ''
 vardim1 = ''
 vardim2 = ''
 m0 = 0
+pDim = collections.namedtuple('PDim', 'id dim')
+pilaDim = []
 retOp = ''
 retTyp = ''
 ################################################################################
@@ -425,9 +427,10 @@ def p_tamano(p):
 
 def p_metearr(p):
     'metearr    :'
-    global vardim1
+    global vardim1, m0
     vardim1 = p[-1]
     dim['dim1'] = Dim(p[-1], 0, 0)
+    m0 = p[-1]
 
 
 #TAMMATRIZ
@@ -468,7 +471,7 @@ def p_asignacion(p):
     operIgualado = pilaO.pop()
     tipo2 = pTipos.pop()
     print(tipo1, tipo2, operador)
-    tipoRes = cuboSem[tipo2][tipo1][operador]
+    tipoRes = cuboSem[tipo1][tipo2][operador]
     print(tipoRes)
     #print(tipo2, tipo1, operador)
     if tipoRes is not -1:
@@ -704,12 +707,75 @@ def p_for(p):
 
 #DIMENSION
 def p_dimension(p):
-    '''dimension    :   LCORCH exp RCORCH matriz'''
+    '''dimension    :   LCORCH esDimensionada exp RCORCH segParte matriz'''
+
 
 #MATRIZ
 def p_matriz(p):
-    '''matriz   :   LCORCH exp RCORCH
-                |'''
+    '''matriz   :   LCORCH exp sonDosDims RCORCH
+                |   soloUnaDim'''
+
+def p_esDimensionada(p):
+    'esDimensionada     :   '
+    global objActual, modActual, pilaDim
+    if p[-2] in dirProc[modActual].vars:
+        if dirProc[modActual].vars[p[-2]].dim is not None:
+            pilaDim.append(pDim(p[-2], 1))
+
+def p_segParte(p):
+    'segParte   :   '
+    global modActual, cont, dim
+    print(dirProc[modActual].vars[p[-5]].dim)
+    lsup = dirProc[modActual].vars[p[-5]].dim['dim1'].lsup
+    linf = dirProc[modActual].vars[p[-5]].dim['dim1'].linf
+    cuad.append(Cuadruplo(cont, 24, pilaO[len(pilaO)-1], linf, lsup))
+    cont += 1
+
+    if pilaDim[len(pilaDim)-1].dim > 1:
+        pass
+    
+    print(pilaDim)
+
+def p_soloUnaDim(p):
+    'soloUnaDim     :   '
+    global MemTempINTCont, MemTempINTOffset, cont, modActual, MemConstanteINTOffset, MemConstanteINTCont, MemConstanteFLOCont, MemConstanteFLOOffset, MemConstanteBOLCont, MemConstanteBOLOffset, MemConstanteSTRCont, MemConstanteSTROffset
+    auxiliar = pilaO.pop()
+    if 'dim2' in dirProc[modActual].vars[p[-6]].dim:
+        if dirProc[modActual].vars[p[-6]].dim['dim1'].mn in MemConstante.int:
+            mN = MemConstante.int[dirProc[modActual].vars[p[-6]].dim['dim1'].mn]
+        else:
+            MemConstante.int[dirProc[modActual].vars[p[-6]].dim['dim1'].mn] = MemConstanteINTCont + MemConstanteINTOffset
+            MemConstanteINTOffset += 1
+            mN = MemConstante.int[dirProc[modActual].vars[p[-6]].dim['dim1'].mn]
+        cuad.append(Cuadruplo(cont, 2, auxiliar, mN, MemTempINTCont + MemTempINTOffset))
+        pilaO.append(MemTempINTCont + MemTempINTOffset)
+        MemTempINTOffset += 1
+        cont += 1
+
+    else:
+
+        base = dirProc[modActual].vars[p[-6]].dirV
+        #if 2500 <= base < 5000:
+        if base not in MemConstante.int:
+            MemConstante.int[base] = MemConstanteINTCont + MemConstanteINTOffset
+            MemConstanteINTOffset += 1
+        cuad.append(Cuadruplo(cont, 0, auxiliar, 0, MemTempINTCont + MemTempINTOffset))
+        temporal = MemTempINTCont + MemTempINTOffset
+        MemTempINTOffset += 1
+        cont += 1
+        cuad.append(Cuadruplo(cont, 0, temporal, MemConstante.int[base], MemTempINTCont + MemTempINTOffset))
+        pilaO.append(("_%s" % (MemTempINTCont + MemTempINTOffset)))
+        MemTempINTOffset += 1
+    cont += 1
+    pilaDim.pop()
+
+def p_sonDosDims(p):
+    'sonDosDims     :   '
+    global cont, modActual, MemTempINTCont, MemTempINTOffset
+    print(p[-8])
+    print(dirProc[modActual])
+    sys.exit()
+
 
 #TERMINO
 def p_termino(p):
@@ -942,7 +1008,8 @@ def p_metodoCall(p):
 
 def p_llamaObjeto(p):
     '''llamaObjeto      :   foundID
-                        |   metodoCall'''
+                        |   metodoCall
+                        |   dimension'''
     global objActual, modActual, MemObjeto, varObjeto
     if p[-2] is ".":
         objActual = dirProc[modActual].vars[p[-3]].type

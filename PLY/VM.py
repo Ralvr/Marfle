@@ -1,6 +1,6 @@
 #coding=UTF-8
 from marfle_yacc import cuad, MemConstante, MemTemporal, MemGlobal, MemLocal, dirProc, objetos
-import sys
+import sys, re
 #print(MemTemporal)
 
 '''
@@ -405,30 +405,70 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			MemTemporal.bool[res] = False
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 10:
+		if type(res) is str:
+			dirDest = int(re.search(r'\d+', res).group())
+			if 22500 <= dirDest < 25000:
+				print(MemTemporal.int)
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					if 2500 <= oper1 < 5000:
+						MemGlobal.int[destino] = MemGlobal.int[oper1]
+					elif 12500 <= oper1 < 15000:
+						MemGlobal.int[destino] = MemLocal.int[oper1]
+					elif 32500 <= oper1 < 35000:
+						MemGlobal.int[destino] = invMemConstINT[oper1]
+					elif 22500 <= oper1 < 25000:
+						MemGlobal.int[destino] = MemTemporal.int[oper1]
+				elif 5000 <= destino < 7500:
+					if 5000 <= oper1 < 7500:
+						MemGlobal.float[destino] = MemGlobal.float[oper1]
+					elif 15000 <= oper1 < 17500:
+						MemGlobal.float[destino] = MemLocal.float[oper1]
+					elif 25000 <= oper1 < 27500:
+						MemGlobal.float[destino] = MemTemporal.float[oper1]
+					elif 35000 <= oper1 < 37500:
+						MemGlobal.float[destino] = invMemConstFLO[oper1]
+
 		#Es una variable global entera
-		if 2500 <= res < 5000:
-			if res in MemGlobal.int:
+		elif 2500 <= res < 5000:
+			#if res in MemGlobal.int:
+			if 2500 <= oper1 < 5000:
+				MemGlobal.int[res] = MemGlobal.int[oper1]
+			elif 12500 <= oper1 < 15000:
+				MemGlobal.int[res] = MemLocal.int[oper1]
+			elif 32500 <= oper1 < 35000:
+				MemGlobal.int[res] = invMemConstINT[oper1]
+			elif 22500 <= oper1 < 25000:
+				MemGlobal.int[res] = MemTemporal.int[oper1]
+			'''else:
 				if 2500 <= oper1 < 5000:
 					MemGlobal.int[res] = MemGlobal.int[oper1]
-				elif 12500 <= oper1 < 15000:
-					MemGlobal.int[res] = MemLocal.int[oper1]
 				elif 32500 <= oper1 < 35000:
 					MemGlobal.int[res] = invMemConstINT[oper1]
 				elif 22500 <= oper1 < 25000:
-					MemGlobal.int[res] = MemTemporal.int[oper1]
-			else:
-				if 2500 <= oper1 < 5000:
-					MemGlobal.int[res] = MemGlobal.int[oper1]
-				elif 32500 <= oper1 < 35000:
-					MemGlobal.int[res] = invMemConstINT[oper1]
-				elif 22500 <= oper1 < 25000:
-					MemGlobal.int[res] = MemTemporal.int[oper1]
+					MemGlobal.int[res] = MemTemporal.int[oper1]'''
 
 		#Es una variable global Flotante
-		if 5000 <= res < 7500:
-			if res in MemGlobal.float:
-				if 5000 <= oper1 < 7500:
-					MemGlobal.float[res] = MemGlobal.float
+		elif 5000 <= res < 7500:
+			#if res in MemGlobal.float:
+			if 2500 <= oper1 < 5000:
+				MemGlobal.float[res] = MemGlobal.int[oper1]
+			elif 12500 <= oper1 < 15000:
+				MemGlobal.float[res] = MemLocal.int[oper1]
+			elif 32500 <= oper1 < 35000:
+				MemGlobal.float[res] = invMemConstINT[oper1]
+			elif 22500 <= oper1 < 25000:
+				MemGlobal.float[res] = MemTemporal.int[oper1]
+			elif 5000 <= oper1 < 7500:
+				MemGlobal.float[res] = MemGlobal.float[oper1]
+			elif 15000 <= oper1 < 17500:
+				MemGlobal.float[res] = MemLocal.float[oper1]
+			elif 25000 <= oper1 < 27500:
+				MemGlobal.float[res] = MemTemporal.float[oper1]
+			elif 35000 <= oper1 < 37500:
+				MemGlobal.float[res] = invMemConstFLO[oper1]
+
+
 		
 		#Es una Variable global Booleana
 		elif 7500 <= res < 10000:
@@ -440,13 +480,15 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 				MemGlobal.str[res] = invMemConstSTR[oper1]
 
 		#LOCALES
-		if 12500 <= res < 15000:
+		elif 12500 <= res < 15000:
 			if 32500 <= oper1 < 35000:
 				stackLocal[len(stackLocal) - 1].int[res] = invMemConstINT[oper1]
 			elif 22500 <= oper1 < 25000:
 				stackLocal[len(stackLocal) - 1].int[res] = MemTemporal.int[oper1]
 			elif 12500 <= oper1 < 25000:
 				stackLocal[len(stackLocal) - 1].int[res] = stackLocal[len(stackLocal) - 1].int[oper1]
+
+		#Es una variable dimensionada
 
 
 		if pos < len(cuad) - 1:
@@ -582,10 +624,25 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		print("Hay NOT") #No se usa en el producto final
 	elif op == 14:	#PRINT
 
+		if type(res) is str:
+			dirDest = int(re.search(r'\d+', res).group())
+			if 22500 <= dirDest < 25000:
+				#print(MemTemporal.int[res])
+				destino = MemTemporal.int[dirDest]
+				if 2500 <= destino < 5000:
+					print(MemGlobal.int[destino])
+				'''elif 12500 <= oper1 < 15000:
+					MemGlobal.int[destino] = MemLocal.int[oper1]
+				elif 32500 <= oper1 < 35000:
+					MemGlobal.int[destino] = invMemConstINT[oper1]
+				elif 22500 <= oper1 < 25000:
+						MemGlobal.int[destino] = MemTemporal.int[oper1]'''
+
 		#GLOBALES
-		if 2500 <= res < 5000:
+		elif 2500 <= res < 5000:
 			print(MemGlobal.int[res])
 		elif 5000 <= res < 7500:
+			print(MemGlobal.float)
 			pass
 		elif 7500 <= res < 10000:
 			pass
@@ -594,11 +651,11 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			print(MemGlobal.str[res])
 
 		#LOCALES
-		if 12500 <= res < 15000:
+		elif 12500 <= res < 15000:
 			print(stackLocal[len(stackLocal) - 1].int[res])
 
 		#CONSTANTES
-		if 32500 <= res < 35000:
+		elif 32500 <= res < 35000:
 			print(invMemConstINT[res])
 		elif 35000 <= res < 37500:
 			pass
@@ -606,7 +663,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			print(invMemConstSTR[res])
 
 		#Temporales
-		if 22500 <= res < 25000:
+		elif 22500 <= res < 25000:
 			print(MemTemporal.int[res])
 
 		if pos < (len(cuad) - 1):
@@ -659,4 +716,12 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		MaquinaVirtual(cuad[siguienteCuad].pos, cuad[siguienteCuad].op, cuad[siguienteCuad].oper1, cuad[siguienteCuad].oper2, cuad[siguienteCuad].res)
 	elif op == 23:
 		print("Hay READ")
+	elif op == 24:
+		#print(oper1, oper2, res, invMemConstINT, MemTemporal)
+		if 22500 <= oper1 < 25000:
+			indice = MemTemporal.int[oper1]
+		if indice < oper2 or indice > res:
+			sys.exit("Índice fuera de rango")
+		else:
+			MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 
