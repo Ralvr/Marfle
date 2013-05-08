@@ -30,7 +30,7 @@ program uno {
     bool boolean;
     endvar;
 
-    func void fibonacci (int n) 
+    func int fibonacci (int n) 
     {
         int a;
         endvar;
@@ -45,7 +45,7 @@ program uno {
         }
     }
 
-    func void arraytest()
+    func int arraytest()
     {
         int err[4];
         endvar;
@@ -54,12 +54,13 @@ program uno {
     }
     
     main ( ) {
+        wow.holis();
         a = 5;
         a = fibonacci(0);;
         print(a);
         a = 5;
         wow.x = 3;
-        wii.x = 4 + wow.x;
+        wii.x = wow.x;
         print(a);
         arr[a-3] = 2;
         dosie[a-4][arr[a-3]] = 4;

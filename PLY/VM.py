@@ -657,8 +657,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			else:
 				sys.exit("Variable no inicializada")
 		elif 12500 <= oper1 < 15000:
-			#print(stackLocal[len(stackLocal)-1])
-			operador1 = stackLocal[len(stackLocal) - 1].int[oper1]
+			operador1 = MemLocal.int[oper1]
 		elif 22500 <= oper1 < 25000:
 			operador1 = MemTemporal.int[oper1]
 		elif 32500 <= oper1 < 35000:
@@ -794,12 +793,13 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		elif 12500 <= res < 15000:
 			if 32500 <= oper1 < 35000:
 				stackLocal[len(stackLocal) - 1].int[res] = invMemConstINT[oper1]
+				MemLocal.int[res] = invMemConstINT[oper1]
 			elif 22500 <= oper1 < 25000:
 				stackLocal[len(stackLocal) - 1].int[res] = MemTemporal.int[oper1]
+				MemLocal.int[res] = MemTemporal.int[oper1]
 			elif 12500 <= oper1 < 25000:
 				stackLocal[len(stackLocal) - 1].int[res] = stackLocal[len(stackLocal) - 1].int[oper1]
-
-		#Es una variable dimensionada
+				MemLocal.int[res] = stackLocal[len(stackLocal) - 1].int[oper1]
 
 
 		if pos < len(cuad) - 1:
@@ -1045,7 +1045,6 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			print("DONE")
 	elif op == 15:
 		#print("Hola RETURN")
-		print(stackLocal)
 		MaquinaVirtual(cuad[(pos+1)].pos, cuad[(pos+1)].op, cuad[(pos+1)].oper1, cuad[(pos+1)].oper2, cuad[(pos+1)].res)
 	elif op == 16:	#GOTOF
 		if MemTemporal.bool[oper1] == False:
@@ -1067,7 +1066,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 		MaquinaVirtual(cuad[res].pos, cuad[res].op, cuad[res].oper1, cuad[res].oper2, cuad[res].res)
 	elif op == 21:
 		#PARAMETROS
-		
+		global MemLocalINTCont, MemLocalINTOffset
 		if type(oper1) is str:
 			dirDest = int(re.search(r'\d+', oper1).group())
 			if 22500 <= dirDest < 25000:
@@ -1097,12 +1096,14 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			MemLocalINTOffset += 1
 		elif 32500 <= oper1 < 35000:
 			parametro = invMemConstINT[oper1]
+			#print(MemLocal)
 			stackLocal[len(stackLocal)-1].int[MemLocalINTCont + MemLocalINTOffset] = parametro
+			MemLocal.int[MemLocalINTCont + MemLocalINTOffset] = parametro
 			MemLocalINTOffset += 1
+
 		MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 	elif op == 22:
 		siguienteCuad = stackEstado.pop()
-		print(stackLocal[len(stackLocal)-1])
 		stackLocal.pop()
 		if siguienteCuad < (len(cuad) - 1):
 			MaquinaVirtual(cuad[siguienteCuad].pos, cuad[siguienteCuad].op, cuad[siguienteCuad].oper1, cuad[siguienteCuad].oper2, cuad[siguienteCuad].res)
@@ -1135,8 +1136,7 @@ def MaquinaVirtual(pos, op, oper1, oper2, res):
 			indice = MemTemporal.int[oper1]
 
 		if indice < oper2 or indice > res:
-			print(indice)
-			sys.exit("Índice fuera de rango")
+			sys.exit("Índice fuera de rango %s" % inidice)
 		else:
 			MaquinaVirtual(cuad[pos+1].pos, cuad[pos+1].op, cuad[pos+1].oper1, cuad[pos+1].oper2, cuad[pos+1].res)
 

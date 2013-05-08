@@ -65,10 +65,8 @@ tokens = [
     'IGUIGU',
     'AND',
     'OR',
-    'NOT',
     'COMMA',
     'PUNTO',
-#    'DOSPUN',
     'SEMCOL',
     'IDENTI',
     'CONINT',
@@ -98,7 +96,6 @@ t_DIFERE    =   r'\!\='
 t_IGUIGU    =   r'\=\='
 t_AND       =   r'\&\&'
 t_OR        =   r'\|\|'
-t_NOT       =   r'\!'
 t_PUNTO     =   r'\.'
 t_COMMA     =   r'\,'
 #t_DOSPUN    =   r'\:'
