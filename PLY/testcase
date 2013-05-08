@@ -13,6 +13,7 @@ program uno {
         {
             int a;
             endvar;
+            a = 2;
             print(a);
         }
     }
@@ -36,17 +37,29 @@ program uno {
 
         if(n == 0 || n == 1)
         {
-            print(n);
+            return(1);
         }
         else
         {
-            print(n);
+            return(n);
         }
+    }
+
+    func void arraytest()
+    {
+        int err[4];
+        endvar;
+        err[1+2] = 1+2;
+        return err[1+2];
     }
     
     main ( ) {
         a = 5;
-        fibonacci(a);
+        a = fibonacci(0);;
+        print(a);
+        a = 5;
+        wow.x = 3;
+        wii.x = 4 + wow.x;
         print(a);
         arr[a-3] = 2;
         dosie[a-4][arr[a-3]] = 4;
@@ -64,7 +77,7 @@ program uno {
         str = "hola";
         boolean = true;
         a = 2 + 4;
-        
-        print("DONE");
+        a = arraytest();;
+        print(a);
     }
 }

@@ -6,7 +6,7 @@
 #Ana Guajardo
 #
 
-import sys, collections, math
+import sys, collections, math, re
 
 #Hace la importación de los tokes del lenguaje
 from marfle_lex import tokens
@@ -169,6 +169,8 @@ modActual = ''
 modSiguiente = ''
 modParamType = ''
 modParams = 1
+retornoProc = {}
+retPr = collections.namedtuple('RetPr', 'dirV type')
 ################################################################################
 
 
@@ -350,10 +352,15 @@ def p_delVis(p):
     global visibilidad
     visibilidad = ''
 
+
+##### SE QUITÓ UN VACÍO DE ESTA REGLA
 def p_objvarsagain(p):
     '''objvarsagain :   objvars
-                    |   ENDVAR SEMCOL
-                    |'''
+                    |   ENDVAR SEMCOL'''
+##### ##### SE QUITÓ UN VACÍO DE ESTA REGLA
+
+
+
 
 def p_insertVar(p):
     'insertVar  :   '
@@ -443,15 +450,16 @@ def p_tammatriz(p):
 #RETURN
 def p_return(p):
     'return :   RETURN superexpresion SEMCOL'
-    global cont, retOp, retTyp, temporal, MemTempINTCont, MemTempINTOffset
+    global cont, retOp, retTyp, temporal, MemTempINTCont, MemTempINTOffset, modActual
     #print(pilaO)
     oper1 = pilaO.pop()
     retOp = oper1
     tipo = pTipos.pop()
+    cuad.append(Cuadruplo(cont, 15, -1, -1, oper1))
+    retOp = oper1
     retTyp = tipo
-    cuad.append(Cuadruplo(cont, 15, -1, -1, MemTempINTCont + MemTempINTOffset))
-    pilaO.append(MemTempINTCont + MemTempINTOffset)
-    pTipos.append(retTyp)
+    retornoProc[modActual] = retPr(retOp, retTyp)
+    print(retornoProc)
     MemTempINTOffset += 1
     cont += 1
 
@@ -462,11 +470,24 @@ def p_asignacion(p):
     '''for cu in cuad:
                     print(cu)
                 print("\n")'''
+    #print(pilaO)
     operador = pOper.pop()
     oper1 = pilaO.pop()
     tipo1 = pTipos.pop()
     operIgualado = pilaO.pop()
     tipo2 = pTipos.pop()
+    intOperIgu = 0
+    '''if type(operIgualado) is str:
+        intOperIgu = int(re.search(r'\d+', operIgualado).group()) 
+    #Voltea los elementos de la pila cuando viene un return
+    if 22500 <= intOperIgu < 32500:
+        tempOp = operIgualado
+        tempType = tipo2
+        operIgualad = oper1
+        tipo2 = tipo1
+        oper1 = tempOp
+        tipo1 = tempType'''
+
     #print(tipo1, tipo2, operador)
     tipoRes = cuboSem[tipo1][tipo2][operador]
     #print(tipoRes)
@@ -482,24 +503,27 @@ def p_asignacion(p):
 
 
 def p_tieneObjeto(p):
-    '''tieneObjeto  :   PUNTO IDENTI foundID
-                    |   foundID
-                    |   dimension'''
+    '''tieneObjeto  :   PUNTO IDENTI foundID 
+                    |   foundID 
+                    |   dimension '''
     global objActual, modActual
     #print(objActual, modActual)
     
 def p_foundID(p):
     'foundID    :'
-    global modActual, objActual, cont
-    #print(p[-1], modActual)
+    global modActual, objActual, cont, MemObjeto, MemObjetoINT, MemObjetoINTOffset, MemObjetoFLO, MemObjetoFLOOffset, MemObjetoBOL, MemObjetoBOLOffset, MemObjetoSTR, MemObjetoSTROffset
+    print(pilaO)
     if objActual is not None:
         #Variables de objeto
         if p[-1] in objetos[objActual].vars:
             pTipos.append(objetos[objActual].vars[p[-1]].type)
             pilaO.append(p[-1])
         elif p[-1] in objetos[objActual].mods[modActual].vars:
-            pTipos.append(objetos[objActual].mods[modActual].vars[p[-1]].type)
-            pilaO.append(p[-1])
+            tipo = objetos[objActual].mods[modActual].vars[p[-1]].type
+            if tipo == 0 or tipo == 1 or tipo == 2 or tipo == 3:
+                print(p[-1])
+                pTipos.append(objetos[objActual].mods[modActual].vars[p[-1]].type)
+                pilaO.append(p[-1])
         elif p[-1] in objetos[objActual].mods[modActual].params:
             pTipos.append(objetos[objActual].mods[modActual].params[p[-1]])
             pilaO.append(p[-1])
@@ -529,7 +553,7 @@ def p_foundID(p):
         pass
     #Revisa variables de tipo objeto
     elif dirProc[modActual].vars[p[-3]].type in objetos:
-        global MemObjeto, MemObjetoINT, MemObjetoINTOffset, MemObjetoFLO, MemObjetoFLOOffset, MemObjetoBOL, MemObjetoBOLOffset, MemObjetoSTR, MemObjetoSTROffset
+        
         objActual = dirProc[modActual].vars[p[-3]].type
         tipoEs = objetos[objActual].vars[p[-1]].type
         #print(pTipos)
@@ -715,6 +739,7 @@ def p_matriz(p):
 def p_esDimensionada(p):
     'esDimensionada     :   '
     global objActual, modActual, pilaDim
+    #print(dirProc[modActual].vars)
     if p[-2] in dirProc[modActual].vars:
         if dirProc[modActual].vars[p[-2]].dim is not None:
             pilaDim.append(pDim(p[-2], 1))
@@ -761,6 +786,7 @@ def p_soloUnaDim(p):
     cont += 1
     cuad.append(Cuadruplo(cont, 0, temporal, MemConstante.int[base], MemTempINTCont + MemTempINTOffset))
     pilaO.append(("_%s" % (MemTempINTCont + MemTempINTOffset)))
+    print(pilaO)
     MemTempINTOffset += 1
     cont += 1
     pilaDim.pop()
@@ -945,24 +971,55 @@ def p_modtipo(p):
 def p_modparams(p):
     '''modparams    :   tipos IDENTI foundParam masmodparams
                     |'''
+
+#######METER LOS TIPOS QUE FALTAN AQUÍ!!!!!                 
 def p_foundParam(p):
     'foundParam :'
-    global modParamType, modActual, objActual, MemLocalINTCont, MemLocalINTOffset
-    #print(p[-1])
-    if objActual is not None and modActual is not None:
-        objetos[objActual].mods[modActual].params[p[-1]] = modParamType
-        #print(objetos)
+    global modParamType, modActual, objActual, MemLocalINTCont, MemLocalINTOffset, MemLocalFLOCont, MemLocalFLOOffset, MemLocalBOLCont, MemLocalBOLOffset, MemLocalSTRCont, MemLocalSTROffset
     
+
+    #Mete los parámetros de módulo en objetos
+    if objActual is not None and modActual is not None:
+        if modParamType == 0:
+            dirLActual = MemLocalINTCont + MemLocalINTOffset
+            objetos[objActual].mods[modActual].params[p[-1]] = dirLActual
+            MemLocalINTOffset += 1
+        elif modParamType == 1:
+            dirLActual = MemLocalFLOCont + MemLocalFLOOffset
+            objetos[objActual].mods[modActual].params[p[-1]] = dirLActual
+            MemLocalFLOOffset += 1
+        elif modParamType == 2:
+            dirLActual = MemLocalBOLCont + MemLocalBOLOffset
+            objetos[objActual].mods[modActual].params[p[-1]] = dirLActual
+            MemLocalBOLOffset += 1
+        elif modParamType == 3:
+            dirLActual = MemLocalSTRCont + MemLocalSTROffset
+            objetos[objActual].mods[modActual].params[p[-1]] = dirLActual
+            MemLocalSTROffset += 1
+    #Mete los parámetros de módulos fuera de objetos
     elif modActual is not None:
         #print(dirProc)
         if modParamType == 0:
             dirLActual = MemLocalINTCont + MemLocalINTOffset
             dirProc[modActual].params[p[-1]] = dirLActual
             MemLocalINTOffset += 1
-        else:
-            dirProc[modActual].params[p[-1]] = modParamType
+        elif modParamType == 1:
+            dirLActual = MemLocalFLOCont + MemLocalFLOOffset
+            dirProc[modActual].params[p[-1]] = dirLActual
+            MemLocalFLOOffset += 1
+        elif modParamType == 2:
+            dirLActual = MemLocalBOLCont + MemLocalBOLOffset
+            dirProc[modActual].params[p[-1]] = dirLActual
+            MemLocalBOLOffset += 1
+        elif modParamType == 3:
+            dirLActual = MemLocalSTRCont + MemLocalSTROffset
+            dirProc[modActual].params[p[-1]] = dirLActual
+            MemLocalSTROffset += 1
         #dirProc[modActual].params[p[-1]] = modParamType
         #print(dirProc)
+#######METER LOS TIPOS QUE FALTAN AQUÍ!!!!! 
+
+
 
 def p_masmodparams(p):
     '''masmodparams :   SEMCOL modparams
@@ -1058,7 +1115,7 @@ def p_mascall(p):
 def p_generaERA(p):
     'generaERA    :    '
     global cont, modActual, modSiguiente, objActual
-    print(objActual, modActual, modSiguiente)
+    #print(objActual, modActual, modSiguiente)
     if p[-3] is not '.':
         cuad.append(Cuadruplo(cont, 19, -1, -1, p[-2]))
         modSiguiente = p[-2]
@@ -1069,7 +1126,7 @@ def p_generaERA(p):
         #Hace que el método de objeto y el objeto estén sincronizados
         objActual = dirProc[modActual].vars[p[-4]].type
         cont += 1
-    print(modSiguiente)
+    #print(modSiguiente)
 
 def p_generaPARAM(p):
     'generaPARAM    :   '
@@ -1089,10 +1146,17 @@ def p_resetPARAM(p):
             cuad.append(Cuadruplo(cont, 20, -1, -1, objetos[objActual].mods[modSiguiente].inicio['inicio']))
     elif modActual in dirProc:
         cuad.append(Cuadruplo(cont, 20, -1, -1, dirProc[modSiguiente].inicio['inicio']))
-    if retOp is not '':
-        pilaO.append(retOp)
-        pTipos.append(retTyp)
-        retOp = retTyp = ''
+    
+    if modSiguiente in retornoProc:
+        pilaO.append(retornoProc[modSiguiente].dirV)
+        pTipos.append(retornoProc[modSiguiente].type)
+    '''if retOp > 0:
+                    print(modSiguiente)
+                    pilaO.append(retOp)
+                    pTipos.append(retTyp)
+                    print(retOp, pilaO)
+                    retOp = retTyp = 0'''
+    print(pilaO)
     cont += 1
 
 def p_otrasconst(p):
@@ -1292,7 +1356,7 @@ def main(arg):
         yacc.yacc()
         s = open('testcase', 'r').read()
         yacc.parse(s)
-        print("\n%s\n" % dirProc)
+        #print("\n%s\n" % dirProc)
 
         for cu in cuad:
             print("%s\t| %s,\t\t\t\t%s,\t\t\t\t%s,\t\t\t\t%s" % (cu.pos, cu.op, cu.oper1, cu.oper2, cu.res))
