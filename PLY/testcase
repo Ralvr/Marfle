@@ -2,83 +2,115 @@ program uno {
     object derp
     {
         public int x;
-        public float barf;
-        public int obArr[3];
-        public bool bolly;
-        public string stringy;
-        private int ark;
+        private float ark;
         endvar;
-
-        func void holis()
+        x = 2;
+        ark = x * 3;
+        func void modobj(int z; int w)
         {
-            int a;
+            int y;
             endvar;
-            a = 2;
-            print(a);
+            modobj ( z + 1 , w * 2 );
+            y = y + 1 * -x;
+            print(y);
+        }
+        func void setX(int entrada)
+        {
+            x = entrada;
+        }
+    }
+
+    object hurp  ( derp )
+    {
+        public int z;
+        private float d42;
+        endvar;
+        z = 3;
+        d42 = 42.42;
+        func void hurper(int z)
+        {
+            z = 5;
+        }
+    }
+
+    object derpina ( hurp )
+    {
+        public float crap;
+        endvar;
+        crap = 2.3;
+        func void hello( )
+        {
+            int s2;
+            endvar;
+            s2 = 4;
+            return s2;
         }
     }
     
     int a;
-    int arr[5];
-    int dosie[4][5];
-    float arr2[4];
     int b;
-    float d;
-    derp wow;
-    derp wii;
+    int d;
     string str;
+    float e;
+    derp bag;
     bool boolean;
+    int j;
     endvar;
 
-    func int fibonacci (int n) 
-    {
-        int a;
+    func int mod1 (int a; int b ) {
+        float y;
         endvar;
-
-        if(n == 0 || n == 1)
+        y = a + b;
+        return y;
+    }
+    func void mod2 () {
+        float e2;
+        endvar;
+        e2 = 2.3;
+        mod1 ( e2 + 3 );
+    }
+    main ( ) {
+        a = 1;
+        a = 3 + 4 * 5 / 7 * 6 * (3 + 4);
+        e = 1.2;
+        str = "hola";
+        boolean = true;
+        mod2 (  ) ;
+        
+        if ( a > 3 && e < 5 )
         {
-            return(1);
+            print ( "Hola" );
         }
         else
         {
-            return(n);
+            if( ! boolean )
+            {
+                a = 1;
+            }
         }
-    }
+        
+        while ( a < 7 )
+        {
+            while ( a > 2 )
+            {
+                e = e * 2;
+            }
+            a = a + 1;
+        }
+        
+        do
+        {
+            a = a + 1;
+        } while ( a < 7 );
 
-    func int arraytest()
-    {
-        int err[4];
-        endvar;
-        err[1+2] = 1+2;
-        return err[1+2];
-    }
-    
-    main ( ) {
-        wow.holis();
-        a = 5;
-        a = fibonacci(0);;
-        print(a);
-        a = 5;
-        wow.x = 3;
-        wii.x = wow.x;
-        print(a);
-        arr[a-3] = 2;
-        dosie[a-4][arr[a-3]] = 4;
-        print(dosie[a-4][arr[a-3]]);
-        d = 3.4;
-        b = 2 * a;
-        print(b);
-        print(arr[a-3]);
-        arr2[1+2] = 4.5;
-        print(arr2[1+2]);
-        print(d);
-        a = 1 + 2 + 3 + 4 + 5 + 6 + 7;
-        a = 5 - 2 + 1;
-        print(a);
-        str = "hola";
-        boolean = true;
-        a = 2 + 4;
-        a = arraytest();;
-        print(a);
+        for(a = 0; a < 3; a = a + 1;)
+        {
+            e = e + 4.5 * a;
+            for(b = 0; a < 4; a = a + 1;){
+                d[a][b] = 0;
+            }
+        }
+
+        a = a * 4;
     }
 }

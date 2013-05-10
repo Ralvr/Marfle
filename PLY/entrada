@@ -1,0 +1,191 @@
+program uno {
+    object derp
+    {
+        public int x;
+        public float barf;
+        public int obArr[3];
+        public bool bolly;
+        public string stringy;
+        private int ark;
+        endvar;
+
+        func void holis()
+        {
+            int a;
+            endvar;
+            a = 2;
+            print(a);
+        }
+
+        func void holis2(int n)
+        {
+            int a;
+            endvar;
+            a = n;
+            print(a);
+        }
+    }
+    
+    int a;
+    int arr[5];
+    int dosie[4][5];
+    float arr2[4];
+    int b;
+    float d;
+    derp wow;
+    derp wii;
+    string str;
+    bool boolean;
+    endvar;
+
+    func int fibonacci (int n) 
+    {
+        int prevPrev;
+        int prev;
+        int result;
+        int i;
+        endvar;
+
+        prevPrev = 0;
+        prev = 1;
+        result = 0;
+        i = 0;
+
+        if (n == 0 || n == 1)
+        {
+            result = n;
+        }
+        else
+        {
+            for (i = 0; i < n; i = i + 1;)
+            {
+                result = prev + prevPrev;
+                prevPrev = prev;
+                prev = result;
+            }
+        }
+        
+        return(result);
+    }
+
+    func void busqueda(int n)
+    {
+        int err[4];
+        int indice;
+        string encontrado;
+        endvar;
+        indice = 0;
+        while(indice < 4)
+        {
+            err[indice] = indice;
+            indice = indice + 1;
+        }
+
+        indice = 0;
+        encontrado = "No encontrado";
+
+        while(indice < 4)
+        {
+            if(err[indice] == n)
+            {
+                encontrado = "Encontrado";
+            }
+            indice = indice + 1;
+        }
+        print(encontrado);
+    }
+
+    func int factorial(int n)
+    {
+        int sum;
+        int inicio;
+        endvar;
+        sum = 1;
+        inicio = 1;
+        if (n <= 1)
+        {
+            return(sum);
+        }
+        while (n > 1)
+        {
+            sum = sum * n;
+            n = n - 1;
+        }
+        return(sum);
+    }
+
+    func int factRecursivo(int n)
+    {
+        int resultado;
+        endvar;
+        if(n < 2)
+        {
+            return(1);
+        }
+        else
+        {
+            return(n * factRecursivo(n - 1););
+        }
+
+    }
+    
+    main ( ) {
+        wow.holis2(7);
+        
+        a = 5;
+        a = factorial(5);;
+        print(a);
+        
+        a = 5;
+        wow.x = 3;
+        wii.x = wow.x;
+        print(a);
+        
+        arr[a-3] = 2;
+        dosie[a-4][arr[a-3]] = 4;
+        print(dosie[a-4][arr[a-3]]);
+        
+        d = 3.4;
+        b = 2 * a;
+        print(b);
+        print(arr[a-3]);
+        
+        arr2[1+2] = 4.5;
+        print(arr2[1+2]);
+        print(d);
+        
+        a = 1 + 2 + 3 + 4 + 5 + 6 + 7;
+        a = 5 - 2 + 1;
+
+        arr[0] = 2;
+        arr[1] = 7;
+        arr[2] = 0;
+        arr[3] = 18;
+        arr[4] = 1;
+        a = 1;
+        boolean = false;
+        while(boolean == false)
+        {   
+            while( a < 5 )
+            {
+                if(arr[a-1] > arr[a])
+                {
+                    b = arr[a-1];
+                    arr[a-1] = arr[a];
+                    arr[a] = b;
+                    boolean = true;
+                }
+                a = a + 1;
+            }
+        }
+
+
+
+        print(a);
+        str = "hola";
+        boolean = true;
+        a = 2 + 4;
+        busqueda(3);
+        print(a);
+    }
+}
